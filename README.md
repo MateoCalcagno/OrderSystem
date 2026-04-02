@@ -12,6 +12,7 @@ Actualmente en desarrollo 🚧 (en constante mejora y expansión de funcionalida
 * Java
 * Spring Boot
 * API REST
+* Base de datos: PostgreSQL
 
 ### 🔹 Frontend
 
