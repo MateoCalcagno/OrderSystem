@@ -33,4 +33,7 @@ public class Product {
         this.name = name;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

@@ -1,88 +1,71 @@
 import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
 
 function Products() {
   const [products, setProducts] = useState([]);
-  const [search, setSearch] = useState("");
   const [newProduct, setNewProduct] = useState("");
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetch("http://localhost:8080/products")
-      .then(res => res.json())
-      .then(data => setProducts(data))
-      .catch(err => console.error(err));
+    loadProducts();
   }, []);
 
-  const handleAddProduct = () => {
+  const loadProducts = async () => {
+    try {
+      const res = await api.get("/products");
+      setProducts(res.data);
+    } catch (err) {
+      console.error("Error al cargar productos");
+    }
+  };
+
+  const handleAddProduct = async () => {
     if (!newProduct.trim()) return;
-    fetch("http://localhost:8080/products", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newProduct })
-    })
-      .then(res => res.json())
-      .then(data => {
-        setProducts([...products, data]);
-        setNewProduct("");
-      })
-      .catch(err => console.error(err));
+    try {
+      const res = await api.post("/products", { name: newProduct });
+      setProducts([...products, res.data]);
+      setNewProduct("");
+    } catch (err) {
+      alert("Error al agregar: Solo Admins");
+    }
   };
 
-  const handleDelete = (id) => {
-    fetch(`http://localhost:8080/products/${id}`, { method: "DELETE" })
-      .then(() => setProducts(products.filter(p => p.id !== id)))
-      .catch(err => console.error(err));
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/products/${id}`);
+      setProducts(products.filter(p => p.id !== id));
+    } catch (err) {
+      alert("No tienes permiso para borrar");
+    }
   };
-
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().startsWith(search.toLowerCase())
-  );
 
   return (
-    <div className="bg-gradient-to-r from-purple-100 via-purple-200 to-purple-300 shadow-lg rounded-2xl p-6 border border-purple-300 text-purple-900 flex flex-col max-h-[450px]">
+    <div className="bg-white/70 p-6 rounded-2xl shadow-lg border border-purple-200">
+      <h2 className="text-2xl font-bold mb-4 text-purple-900">🏷️ Productos</h2>
       
-      <h2 className="text-2xl font-bold mb-4">🏷️ Productos</h2>
+      {user.role === "ADMIN" && (
+        <div className="flex gap-2 mb-4">
+          <input 
+            className="flex-1 p-2 rounded-lg border border-purple-300"
+            value={newProduct}
+            onChange={(e) => setNewProduct(e.target.value)}
+            placeholder="Nuevo producto..."
+          />
+          <button onClick={handleAddProduct} className="bg-purple-600 text-white px-4 py-2 rounded-lg">Añadir</button>
+        </div>
+      )}
 
-      <input
-        type="text"
-        placeholder="Buscar producto..."
-        className="border-2 border-purple-300 p-3 rounded-xl w-full mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-
-      <div className="flex gap-3 mb-4">
-        <input
-          type="text"
-          placeholder="Nuevo producto"
-          className="flex-1 border-2 border-purple-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-          value={newProduct}
-          onChange={(e) => setNewProduct(e.target.value)}
-        />
-        <button
-          onClick={handleAddProduct}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl shadow-lg transition transform hover:-translate-y-1"
-        >
-          Agregar
-        </button>
-      </div>
-
-      {/* LISTA EN GRID CON SCROLL */}
-      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 overflow-y-auto flex-1 pr-2">
-        {filteredProducts.map(p => (
-          <li
-            key={p.id}
-            className="flex justify-between items-center bg-white rounded-lg px-3 py-2 shadow-sm border border-purple-200 hover:shadow-md transition"
-          >
-            <span className="text-purple-800 font-medium">{p.name}</span>
-            <button
-              onClick={() => handleDelete(p.id)}
-              className="text-red-600 hover:text-red-800 transition"
-            >
-              ✕
-            </button>
-          </li>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {products.map(p => (
+          <div key={p.id} className="bg-white p-4 rounded-xl shadow flex justify-between items-center border border-purple-100">
+            <span className="font-semibold text-purple-800">{p.name}</span>
+            {user.role === "ADMIN" && (
+              <button onClick={() => handleDelete(p.id)} className="text-red-500 font-bold">✕</button>
+            )}
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

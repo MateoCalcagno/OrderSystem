@@ -29,7 +29,7 @@ public class ProductService {
     public Product update(Long id, Product updatedProduct) {
         return repository.findById(id)
                 .map(product -> {
-                    product.setName(updatedProduct.getName());
+                    product.setName(capitalize(updatedProduct.getName()));
                     return repository.save(product);
                 })
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
