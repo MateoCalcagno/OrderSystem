@@ -22,6 +22,11 @@ function App() {
               Gestiona productos y órdenes de manera sencilla
             </p>
           </div>
+          <img
+            src="/logoSP.jpeg"
+            alt="Logo"
+            className="absolute top-6 right-9 w-20 h-20 object-contain"
+          />
         </header>
 
         <Navbar />

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 function Orders() {
   const [products, setProducts] = useState([]);
+  const [searchProduct, setSearchProduct] = useState(""); // 🔹 estado búsqueda
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [newOrderId, setNewOrderId] = useState(null);
@@ -50,6 +51,11 @@ function Orders() {
       .catch(err => console.error(err));
   };
 
+  // 🔹 filtrar productos según búsqueda (empieza con)
+  const filteredProducts = products.filter(p =>
+    p.name.toLowerCase().startsWith(searchProduct.toLowerCase())
+  );
+
   const productCount = {};
   orders.forEach(order => {
     order.products.forEach(p => {
@@ -63,12 +69,21 @@ function Orders() {
       <div className="flex flex-col flex-1 bg-gradient-to-r from-purple-100 via-purple-200 to-purple-300 rounded-2xl p-6 border border-purple-300 text-purple-900">
         <h2 className="text-2xl font-bold text-purple-900 mb-4">➕ Crear Nueva Orden</h2>
 
+        {/* 🔹 Input búsqueda */}
+        <input
+          type="text"
+          placeholder="Buscar producto..."
+          className="border-2 border-purple-300 p-2 rounded-xl w-full mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+          value={searchProduct}
+          onChange={(e) => setSearchProduct(e.target.value)}
+        />
+
         {/* Lista de productos con scroll interno */}
         <div className="flex-1 overflow-y-auto mb-4 grid grid-cols-2 gap-2">
-          {products.map(p => (
+          {filteredProducts.map(p => (
             <label
               key={p.id}
-              className="bg-white flex items-center gap-2 p-2 rounded-lg border border-purple-300 hover:bg-purple-50 cursor-pointer"
+              className="bg-white flex items-center gap-2 p-2 rounded-lg border border-purple-300 hover:bg-purple-50 cursor-pointer w-50 h-12 justify-start"
             >
               <input
                 type="checkbox"

@@ -17,6 +17,7 @@ public class ProductService {
     }
 
     public Product create(Product product) {
+        product.setName(capitalize(product.getName()));
         return repository.save(product);
     }
 
@@ -36,5 +37,22 @@ public class ProductService {
 
     public void delete(Long id) {
         repository.deleteById(id);
+    }
+
+    public String capitalize(String text) {
+        if (text == null || text.isEmpty()) return text;
+
+        String[] words = text.toLowerCase().split(" ");
+        StringBuilder result = new StringBuilder();
+
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                result.append(Character.toUpperCase(word.charAt(0)))
+                    .append(word.substring(1))
+                    .append(" ");
+            }
+        }
+
+        return result.toString().trim();
     }
 }

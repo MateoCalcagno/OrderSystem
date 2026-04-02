@@ -34,13 +34,13 @@ function Products() {
   };
 
   const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+    p.name.toLowerCase().startsWith(search.toLowerCase())
   );
 
   return (
     <div className="bg-gradient-to-r from-purple-100 via-purple-200 to-purple-300 shadow-lg rounded-2xl p-6 border border-purple-300 text-purple-900 flex flex-col max-h-[450px]">
       
-      <h2 className="text-3xl font-bold mb-4">🏷️ Productos</h2>
+      <h2 className="text-2xl font-bold mb-4">🏷️ Productos</h2>
 
       <input
         type="text"
