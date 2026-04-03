@@ -34,6 +34,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/users/register").permitAll()                // Registro libre
                 .requestMatchers("/users/login").permitAll()       // Permitir Login
+                .requestMatchers(HttpMethod.PUT,"/users/{username}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/products/**").hasAnyRole("USER", "ADMIN") // GET productos
                 .requestMatchers(HttpMethod.POST, "/products/**").hasRole("ADMIN")          // Crear producto solo admin
                 .requestMatchers(HttpMethod.PUT, "/products/**").hasRole("ADMIN")           // Modificar producto solo admin
