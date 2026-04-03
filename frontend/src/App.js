@@ -6,6 +6,7 @@ import Orders from "./pages/Orders";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login"; 
 import Navbar from "./components/Navbar";
+import SignUp from "./pages/SignUp";
 
 // Componente para proteger rutas (Solo para logueados)
 const PrivateRoute = ({ children }) => {
@@ -56,6 +57,7 @@ function AppContent() {
           <Routes>
             {/* Ruta pública */}
             <Route path="/login" element={!user ? <Login /> : <Navigate to="/products" />} />
+            <Route path="/signup" element={!user ? <SignUp /> : <Navigate to="/products" />} />
 
             {/* Rutas Protegidas */}
             <Route path="/products" element={<PrivateRoute><Products /></PrivateRoute>} />

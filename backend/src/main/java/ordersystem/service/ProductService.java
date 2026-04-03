@@ -1,7 +1,11 @@
-package ordersystem;
+package ordersystem.service;
 
 import org.springframework.stereotype.Service;
 import java.util.List;
+
+import ordersystem.repository.ProductRepository;
+import ordersystem.exception.ResourceNotFoundException;
+import ordersystem.model.Product;
 
 @Service
 public class ProductService {
@@ -23,7 +27,7 @@ public class ProductService {
 
     public Product getById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
     }
 
     public Product update(Long id, Product updatedProduct) {
@@ -32,10 +36,13 @@ public class ProductService {
                     product.setName(capitalize(updatedProduct.getName()));
                     return repository.save(product);
                 })
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
     }
 
     public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Producto no encontrado");
+        }
         repository.deleteById(id);
     }
 

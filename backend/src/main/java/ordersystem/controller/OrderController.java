@@ -1,10 +1,12 @@
-package ordersystem;
+package ordersystem.controller;
 
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.validation.Valid;
-
 import java.util.List;
+
+import ordersystem.service.OrderService;
+import ordersystem.dto.OrderResponseDTO;
+import ordersystem.dto.OrderRequestDTO;
 
 @RestController
 @RequestMapping("/orders")

@@ -1,10 +1,14 @@
-package ordersystem;
+package ordersystem.controller;
 
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.validation.Valid;
-
 import java.util.List;
+import java.util.Map;
+
+import ordersystem.service.UserService;
+import ordersystem.dto.UserResponseDTO;
+import ordersystem.dto.LoginDTO;
+import ordersystem.dto.RegisterDTO;
 
 @RestController
 @RequestMapping("/users")
@@ -18,8 +22,13 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public UserResponseDTO register(@RequestBody @Valid LoginDTO dto) {
+    public UserResponseDTO register(@RequestBody @Valid RegisterDTO dto) {
         return service.register(dto);
+    }
+
+    @PostMapping("/login")
+    public Map<String, String> login(@RequestBody LoginDTO dto) {
+        return service.login(dto);
     }
 
     @GetMapping

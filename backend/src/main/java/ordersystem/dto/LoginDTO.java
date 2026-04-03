@@ -1,7 +1,9 @@
-package ordersystem;
+package ordersystem.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import ordersystem.model.Role;
 
 public class LoginDTO {
     @NotBlank(message = "El nombre de usuario es obligatorio")

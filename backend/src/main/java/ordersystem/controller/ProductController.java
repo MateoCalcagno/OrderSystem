@@ -1,7 +1,10 @@
-package ordersystem;
+package ordersystem.controller;
 
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+
+import ordersystem.service.ProductService;
+import ordersystem.model.Product;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")

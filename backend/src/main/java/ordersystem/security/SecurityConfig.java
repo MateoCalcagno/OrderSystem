@@ -1,4 +1,4 @@
-package ordersystem;
+package ordersystem.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +10,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.List;
 
@@ -17,6 +20,11 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class SecurityConfig {
+    private final JwtFilter jwtFilter;
+
+    public SecurityConfig(JwtFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -25,15 +33,17 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) 
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/users/register").permitAll()                // Registro libre
+                .requestMatchers("/users/login").permitAll()       // Permitir Login
                 .requestMatchers(HttpMethod.GET, "/products/**").hasAnyRole("USER", "ADMIN") // GET productos
                 .requestMatchers(HttpMethod.POST, "/products/**").hasRole("ADMIN")          // Crear producto solo admin
                 .requestMatchers(HttpMethod.PUT, "/products/**").hasRole("ADMIN")           // Modificar producto solo admin
                 .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")        // Borrar producto solo admin
                 .requestMatchers(HttpMethod.POST, "/orders/**").hasRole("USER")             // Crear pedido
                 .requestMatchers(HttpMethod.GET, "/orders/**").hasAnyRole("USER", "ADMIN")  // Ver pedidos
+                .requestMatchers(HttpMethod.DELETE, "/orders/**").hasAnyRole("USER", "ADMIN")  // Eliminar pedidos
                 .anyRequest().authenticated()                                              // Todo lo demás requiere autenticación
             )
-            .httpBasic(withDefaults()); 
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
             
         return http.build();
     }
@@ -55,5 +65,10 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 }

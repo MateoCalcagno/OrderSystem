@@ -1,4 +1,4 @@
-package ordersystem;
+package ordersystem.dto;
 
 import java.util.List;
 

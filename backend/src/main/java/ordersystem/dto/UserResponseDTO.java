@@ -1,4 +1,6 @@
-package ordersystem;
+package ordersystem.dto;
+
+import ordersystem.model.Role;
 
 public class UserResponseDTO {
     private String username;

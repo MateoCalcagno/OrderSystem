@@ -4,13 +4,16 @@ const api = axios.create({
   baseURL: 'http://localhost:8080',
 });
 
-// Interceptor para pegar el Token automáticamente en cada petición
 api.interceptors.request.use((config) => {
   const savedUser = JSON.parse(localStorage.getItem("user"));
-  if (savedUser && savedUser.authHeader) {
-    config.headers.Authorization = savedUser.authHeader;
+  
+  // Si existe el usuario y tiene un token, lo mandamos como Bearer
+  if (savedUser && savedUser.token) {
+    config.headers.Authorization = `Bearer ${savedUser.token}`;
   }
   return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 export default api;

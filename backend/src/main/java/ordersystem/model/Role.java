@@ -1,4 +1,4 @@
-package ordersystem;
+package ordersystem.model;
 
 public enum Role {
     USER,

@@ -1,11 +1,18 @@
-package ordersystem;
+package ordersystem.service;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import ordersystem.repository.*;
+import ordersystem.model.*;
+import ordersystem.dto.OrderResponseDTO;
+import ordersystem.dto.OrderRequestDTO;
+import ordersystem.exception.ResourceNotFoundException;;
 
 @Service
 public class OrderService {
@@ -95,7 +102,7 @@ public class OrderService {
         if (isOwner || isAdmin) {
             orderRepository.delete(order);
         } else {
-            throw new RuntimeException("No tenés permiso para borrar esta orden");
+            throw new AccessDeniedException("No tenés permiso para borrar esta orden");
         }
     }
 }

@@ -14,33 +14,28 @@ function Login() {
     e.preventDefault();
     setError("");
     
-    // Creamos el header temporal solo para validar
-    const authHeader = "Basic " + btoa(`${username}:${password}`);
-
     try {
-      // Intentamos obtener los productos como prueba de login
-      const response = await api.get("/products", {
-        headers: { "Authorization": authHeader }
+      // 1. Llamamos al endpoint de login que devuelve el TOKEN
+      const response = await api.post("/users/login", { username, password });
+      const { token } = response.data;
+
+      // 2. Con el token, podemos pedir la info de los usuarios para saber el rol
+      // (Opcional: podrías modificar tu backend para que el login ya devuelva el rol)
+      const usersRes = await api.get("/users", {
+        headers: { Authorization: `Bearer ${token}` }
       });
+      
+      const foundUser = usersRes.data.find(u => u.username === username);
 
-      if (response.status === 200) {
-        // Buscamos el rol del usuario (podrías tener un endpoint /me, 
-        // pero como tenemos /users, buscamos ahí)
-        const usersRes = await api.get("/users", {
-          headers: { "Authorization": authHeader }
-        });
-        
-        const foundUser = usersRes.data.find(u => u.username === username);
-
-        login({
-          username,
-          role: foundUser ? foundUser.role : "USER",
-          authHeader
-        });
-        navigate("/products");
-      }
+      login({
+        username,
+        role: foundUser ? foundUser.role : "USER",
+        token // Guardamos el JWT
+      });
+      
+      navigate("/products");
     } catch (err) {
-      setError("Usuario o contraseña incorrectos");
+      setError("Credenciales inválidas");
     }
   };
 
@@ -69,6 +64,17 @@ function Login() {
           <button type="submit" className="w-full bg-purple-600 text-white font-bold py-3 rounded-xl hover:bg-purple-700 transition">
             Entrar
           </button>
+
+          <p className="text-center mt-6 text-sm text-purple-800">
+            ¿No tenés cuenta?{" "}
+            <button
+              type="button" // IMPORTANTE: type="button" para que NO intente hacer login al tocarlo
+              onClick={() => navigate("/signup")}
+              className="text-purple-600 cursor-pointer font-bold hover:underline bg-transparent border-none p-0"
+            >
+              Registrate
+            </button>
+          </p>
         </form>
       </div>
     </div>

@@ -1,4 +1,4 @@
-package ordersystem;
+package ordersystem.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 
