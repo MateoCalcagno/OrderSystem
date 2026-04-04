@@ -4,186 +4,84 @@ import api from "../services/api";
 
 function Orders() {
   const [orders, setOrders] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [selectedProductId, setSelectedProductId] = useState("");
-  const [cart, setCart] = useState([]);
   const [search, setSearch] = useState("");
   const { user } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ordRes, prodRes] = await Promise.all([
-          api.get("/orders"),
-          api.get("/products"),
-        ]);
-        setOrders(ordRes.data);
-        setProducts(prodRes.data);
-      } catch (err) {
-        console.error("Error al cargar datos", err);
-      }
+        const res = await api.get("/orders");
+        setOrders(res.data);
+      } catch (err) { console.error("Error"); }
     };
     fetchData();
   }, []);
 
-  const addToCart = () => {
-    if (!selectedProductId) return;
-    const product = products.find(p => p.id === parseInt(selectedProductId));
-    if (product) {
-      setCart([...cart, product]);
-      setSelectedProductId("");
-    }
+  // --- FUNCIÓN PARA AGRUPAR PRODUCTOS ---
+  const formatProducts = (productsArray) => {
+    if (!Array.isArray(productsArray) || productsArray.length === 0) return "Sin productos";
+
+    // Contamos las ocurrencias: { "Coca Cola": 2, "Fernet": 1 }
+    const counts = productsArray.reduce((acc, name) => {
+      acc[name] = (acc[name] || 0) + 1;
+      return acc;
+    }, {});
+
+    // Convertimos el objeto a un string: "Coca Cola (2), Fernet (1)"
+    return Object.entries(counts)
+      .map(([name, count]) => `${name} (${count})`)
+      .join(", ");
   };
 
-  const removeFromCart = (index) => {
-    setCart(cart.filter((_, i) => i !== index));
-  };
-
-  const handleCreateOrder = async () => {
-    if (cart.length === 0) return alert("El carrito está vacío");
-    
-    try {
-      const productIds = cart.map(p => p.id);
-      const res = await api.post("/orders", { productIds });
-      
-      setOrders([...orders, res.data]);
-      setCart([]);
-      alert("¡Pedido realizado con éxito!");
-    } catch (err) {
-      alert("Error al crear el pedido");
-    }
-  };
-
-  // 🔍 FILTRO
-  const filteredOrders = orders.filter(o =>
+  const filteredOrders = orders.filter(o => 
     o.username?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="bg-white/10 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-white/10 flex flex-col h-full max-w-5xl mx-auto">
+    <div className="bg-white/10 backdrop-blur-xl p-6 rounded-2xl border border-white/10 h-full flex flex-col shadow-lg">
+      <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+        {user.role === "ADMIN" ? "📦 Gestión de Órdenes" : "🛍️ Mis Compras"}
+      </h2>
 
-      {/* HEADER */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white">
-          {user.role === "ADMIN" ? "📦 Gestión de Órdenes" : "🛍️ Mis Compras"}
-        </h2>
-      </div>
-
-      {/* CREAR ORDEN */}
-      {user.role === "USER" && (
-        <div className="mb-6 space-y-4">
-
-          <div className="flex gap-3 bg-white/5 p-4 rounded-2xl border border-white/10">
-
-            {/* 🔥 SELECT ARREGLADO */}
-            <select
-              className="flex-1 p-3 rounded-xl bg-white text-gray-900 border border-white/20 outline-none"
-              value={selectedProductId}
-              onChange={(e) => setSelectedProductId(e.target.value)}
-            >
-              <option value="">Selecciona un producto...</option>
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-
-            <button
-              onClick={addToCart}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 rounded-xl font-bold text-white hover:scale-105 active:scale-95 transition-all shadow-lg"
-            >
-              + Agregar
-            </button>
-          </div>
-
-          {cart.length > 0 && (
-            <div className="bg-white/5 p-5 rounded-2xl border border-white/10">
-              <p className="text-white/70 text-sm mb-3">Tu pedido:</p>
-
-              <div className="flex flex-wrap gap-2 mb-4">
-                {cart.map((p, index) => (
-                  <span 
-                    key={index} 
-                    className="bg-white/10 border border-white/20 px-3 py-1 rounded-full text-sm text-white flex items-center gap-2"
-                  >
-                    {p.name}
-                    <button 
-                      onClick={() => removeFromCart(index)} 
-                      className="text-red-400 hover:text-red-500"
-                    >
-                      ✕
-                    </button>
-                  </span>
-                ))}
-              </div>
-
-              <button
-                onClick={handleCreateOrder}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-3 rounded-xl font-bold text-white hover:scale-[1.02] active:scale-95 transition-all shadow-lg"
-              >
-                Confirmar Compra ({cart.length})
-              </button>
-            </div>
-          )}
-        </div>
+      {user.role === "ADMIN" && (
+        <input 
+          type="text" 
+          placeholder="Buscar cliente..." 
+          value={search} 
+          onChange={(e) => setSearch(e.target.value)} 
+          className="w-full p-3 rounded-xl bg-white/5 border border-white/20 text-white mb-4 outline-none focus:ring-2 focus:ring-purple-500 transition-all" 
+        />
       )}
 
-      {/* HISTORIAL (FIJO) */}
-      <div className="mb-4">
-        <h3 className="text-sm text-white/50 font-semibold uppercase tracking-wider mb-3">
-          Historial
-        </h3>
-
-        {user.role === "ADMIN" && (
-          <input
-            type="text"
-            placeholder="Buscar por cliente..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 outline-none focus:ring-2 focus:ring-purple-500"
-          />
-        )}
-      </div>
-
-      {/* 📦 LISTA CON SCROLL */}
-      <div className="flex-1 overflow-y-auto pr-2">
-        <div className="space-y-4">
-
-          {filteredOrders.map((o) => (
-            <div 
-              key={o.id} 
-              className="bg-white/5 p-4 rounded-2xl border border-white/10 flex justify-between items-center hover:scale-[1.01] transition-all"
-            >
-              
+      <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-hide">
+        {filteredOrders.length === 0 ? (
+          <p className="text-white/30 italic text-center py-10">No hay órdenes registradas</p>
+        ) : (
+          filteredOrders.map((o) => (
+            <div key={o.id} className="bg-white/5 p-4 rounded-xl border border-white/5 flex justify-between items-center text-white hover:bg-white/10 transition-all group">
               <div className="flex items-center gap-4">
-
-                <div className="w-10 h-10 bg-purple-600/20 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                <div className="w-10 h-10 bg-purple-600/20 rounded-lg flex items-center justify-center font-bold text-xs text-purple-400 border border-purple-500/20 shadow-inner">
                   #{o.id}
                 </div>
-
                 <div>
-                  <p className="text-white font-semibold">
-                    {Array.isArray(o.products) ? o.products.join(", ") : "Sin productos"}
+                  {/* AQUÍ USAMOS LA FUNCIÓN DE FORMATO */}
+                  <p className="font-semibold text-sm text-white/90">
+                    {formatProducts(o.products)}
                   </p>
-
                   {user.role === "ADMIN" && (
-                    <p className="text-xs text-pink-400">
+                    <p className="text-[10px] text-pink-400 uppercase tracking-widest mt-1">
                       Cliente: {o.username}
                     </p>
                   )}
                 </div>
               </div>
-
-              <span className="text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/20 font-semibold">
-                COMPLETADO
+              <span className="text-[10px] bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/20 font-bold uppercase tracking-tighter">
+                Completado
               </span>
             </div>
-          ))}
-
-        </div>
+          ))
+        )}
       </div>
-
     </div>
   );
 }
