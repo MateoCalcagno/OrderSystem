@@ -50,7 +50,8 @@ public class OrderService {
             .map(order -> new OrderResponseDTO(
                 order.getId(),
                 order.getProducts().stream().map(Product::getName).toList(),
-                order.getUser().getUsername()
+                order.getUser().getUsername(),
+                order.getCreatedAt() // <-- nueva línea
             ))
             .toList();
     }
@@ -80,7 +81,8 @@ public class OrderService {
         return new OrderResponseDTO(
             saved.getId(), 
             saved.getProducts().stream().map(Product::getName).toList(), 
-            saved.getUser().getUsername()
+            saved.getUser().getUsername(),
+            saved.getCreatedAt()
         );
     }
 

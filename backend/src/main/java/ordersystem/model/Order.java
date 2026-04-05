@@ -1,6 +1,8 @@
 package ordersystem.model;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -21,6 +23,9 @@ public class Order {
     )
     private List<Product> products;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
     @ManyToOne // Muchos pedidos pertenecen a un usuario
     @JoinColumn(name = "user_id") 
     @JsonBackReference
@@ -38,6 +43,8 @@ public class Order {
     public Long getId() {
         return id;
     }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
 
     public List<Product> getProducts() {
         return products;
