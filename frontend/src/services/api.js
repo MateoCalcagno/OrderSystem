@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+
 const api = axios.create({
-  baseURL: 'https://ordersystem-backend.onrender.com',
+  baseURL: API_URL,
 });
 
 api.interceptors.request.use((config) => {
