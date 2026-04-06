@@ -1,7 +1,22 @@
 # 🧾 Order System App
 
-Aplicación fullstack para la gestión de productos y órdenes.
-Actualmente en desarrollo 🚧 (en constante mejora y expansión de funcionalidades).
+Aplicación **fullstack** para la gestión de productos y órdenes con autenticación segura, roles de usuario y dashboard de estadísticas.
+
+🚧 Proyecto en desarrollo activo (mejoras continuas y nuevas funcionalidades)
+
+---
+
+## ✨ Features principales
+
+* 🔐 Autenticación con JWT
+* 👤 Registro e inicio de sesión de usuarios
+* 🛡️ Control de roles (USER / ADMIN)
+* 🛒 Carrito de compras dinámico
+* 📦 Creación y gestión de órdenes
+* 🏷️ CRUD completo de productos (solo ADMIN)
+* 📊 Dashboard con estadísticas de ventas
+* 🔎 Búsqueda de productos y órdenes
+* ⚡ Interfaz moderna y responsive
 
 ---
 
@@ -11,14 +26,37 @@ Actualmente en desarrollo 🚧 (en constante mejora y expansión de funcionalida
 
 * Java
 * Spring Boot
-* API REST
-* Base de datos: PostgreSQL
+* Spring Security
+* JWT (JSON Web Tokens)
+* Spring Data JPA / Hibernate
+* PostgreSQL
+* Arquitectura REST
+* Validaciones con Jakarta Validation
+
+---
 
 ### 🔹 Frontend
 
 * React
 * JavaScript (ES6+)
 * Tailwind CSS
+* Axios
+* React Context API
+* React Router DOM
+* Recharts (gráficos)
+* React Hot Toast (notificaciones)
+
+---
+
+## 🏗️ Arquitectura
+
+El proyecto sigue una arquitectura en capas:
+
+* **Controller** → Manejo de endpoints REST
+* **Service** → Lógica de negocio
+* **Repository** → Acceso a datos (JPA)
+* **DTOs** → Transferencia de datos
+* **Security** → JWT + filtros + roles
 
 ---
 
@@ -26,8 +64,8 @@ Actualmente en desarrollo 🚧 (en constante mejora y expansión de funcionalida
 
 ```bash
 ordersystem/
-├── backend/   # API con Spring Boot
-├── frontend/  # App en React + Tailwind
+├── backend/   # API REST con Spring Boot
+├── frontend/  # Aplicación en React
 ```
 
 ---
@@ -38,8 +76,12 @@ ordersystem/
 
 ```bash
 cd backend
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
+
+Servidor: http://localhost:8080
+
+---
 
 ### 🔹 Frontend
 
@@ -49,24 +91,61 @@ npm install
 npm start
 ```
 
+App: http://localhost:3000
+
+---
+
+## 🔐 Seguridad
+
+* Autenticación basada en JWT
+* Contraseñas encriptadas con BCrypt
+* Filtro personalizado (`JwtFilter`)
+* Control de acceso por roles:
+
+  * ADMIN → gestión completa
+  * USER → compras y órdenes
+
+---
+
+## 📊 Funcionalidades destacadas
+
+### 👤 Usuario
+
+* Registro y login
+* Visualización de productos
+* Agregar productos al carrito
+* Crear órdenes
+* Ver historial de compras
+
+### 🛠️ Administrador
+
+* Crear / editar / eliminar productos
+* Ver todas las órdenes
+* Dashboard con estadísticas
+
 ---
 
 ## 🎯 Objetivo del proyecto
 
-Este proyecto fue desarrollado como práctica fullstack para:
+Este proyecto fue desarrollado para:
 
-* Integrar frontend y backend
-* Aplicar buenas prácticas de desarrollo
-* Simular un sistema real de gestión de pedidos
+* Practicar desarrollo fullstack
+* Implementar autenticación y seguridad real
+* Aplicar buenas prácticas (DTOs, capas, validaciones)
+* Simular un sistema de pedidos real
 
 ---
 
 ## 👨‍💻 Autor
 
-Mateo Calcagno
+**Mateo Calcagno**
 
 ---
 
-## 📌 Notas
+## 📌 Estado del proyecto
 
-Este repositorio se encuentra en desarrollo activo, por lo que puede contener cambios frecuentes y nuevas funcionalidades en proceso.
+🚧 En desarrollo 
+
+
+---
+
