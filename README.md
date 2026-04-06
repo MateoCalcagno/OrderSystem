@@ -70,36 +70,20 @@ ordersystem/
 
 ---
 
-## ▶️ Cómo ejecutar el proyecto
+## ▶️ Cómo probar el proyecto
 
-### 🔹 Backend
+El proyecto ya está desplegado y se puede usar directamente sin necesidad de instalar nada localmente:
 
-```bash
-cd backend
-mvn spring-boot:run
-```
+* Frontend (Vercel): https://order-system-vert.vercel.app
+* Backend (Render): https://ordersystem-backend.onrender.com
 
-Servidor: http://localhost:8080
+💡 Cuenta de administrador de ejemplo:
 
----
++ Usuario: admin
++ Contraseña: 1234
+Con esta cuenta se puede acceder a todas las funcionalidades de administrador.
 
-### 🔹 Frontend
-
-```bash
-cd frontend
-npm install
-npm start
-```
-
-App: http://localhost:3000
-
----
-
-🌐 Despliegue y prueba online
-
-El proyecto ya está desplegado y se puede usar directamente:
-	•	Frontend (Vercel): https://order-system-vert.vercel.app￼
-	•	Backend (Render): https://ordersystem-backend.onrender.com￼
+Para probar como usuario normal, pueden registrarse con cualquier email y contraseña.
 
 ---
 
