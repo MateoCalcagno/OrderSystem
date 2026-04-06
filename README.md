@@ -95,6 +95,14 @@ App: http://localhost:3000
 
 ---
 
+🌐 Despliegue y prueba online
+
+El proyecto ya está desplegado y se puede usar directamente:
+	•	Frontend (Vercel): https://order-system-vert.vercel.app￼
+	•	Backend (Render): https://ordersystem-backend.onrender.com￼
+
+---
+
 ## 🔐 Seguridad
 
 * Autenticación basada en JWT
