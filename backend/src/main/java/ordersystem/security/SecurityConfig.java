@@ -32,6 +32,7 @@ public class SecurityConfig {
             .cors(withDefaults()) 
             .csrf(csrf -> csrf.disable()) 
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/health").permitAll() // UptimeRobot
                 .requestMatchers("/users/register").permitAll()                // Registro libre
                 .requestMatchers("/users/login").permitAll()       // Permitir Login
                 .requestMatchers(HttpMethod.PUT,"/users/{username}").permitAll()
