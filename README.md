@@ -77,14 +77,18 @@ El proyecto ya está desplegado y se puede usar directamente sin necesidad de in
 * Frontend (Vercel): https://order-system-vert.vercel.app
 * Backend (Render): https://ordersystem-backend.onrender.com
 
-💡 Cuenta de administrador de ejemplo:
+💡 Cuentas de ejemplo:
 
+ADMIN
 + Usuario: admin
 + Contraseña: 1234
-
 Con esta cuenta se puede acceder a todas las funcionalidades de administrador.
 
-Para probar como usuario normal, pueden registrarse con cualquier email y contraseña.
+USER
++ Usuario: juan
++ Contraseña: 1234
+
+Con esta cuenta se puede acceder a todas las funcionalidades de usuario o pueden registrarse con cualquier email y contraseña.
 
 ---
 
