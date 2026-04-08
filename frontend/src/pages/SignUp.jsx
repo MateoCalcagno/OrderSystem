@@ -41,8 +41,23 @@ function SignUp() {
       }, 1200);
 
     } catch (err) {
-      const serverError = err.response?.data?.error || "Error al registrarse";
-      setError(serverError);
+      if (err.response?.data) {
+        const data = err.response.data;
+
+        // Prioriza `message` si existe
+        if (data.message) {
+          setError(data.message);
+        } 
+        // Si viene un objeto de validación tipo { field: ["msg1", "msg2"] }
+        else {
+          const messages = Object.values(data)
+            .flat()
+            .join(" | ");
+          setError(messages || "Error al registrarse");
+        }
+      } else {
+        setError("Error al registrarse");
+      }
     }
   };
 
