@@ -1,6 +1,5 @@
 package ordersystem.service;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
@@ -12,7 +11,8 @@ import ordersystem.repository.*;
 import ordersystem.model.*;
 import ordersystem.dto.OrderResponseDTO;
 import ordersystem.dto.OrderRequestDTO;
-import ordersystem.exception.ResourceNotFoundException;;
+import ordersystem.exception.ResourceNotFoundException;
+import ordersystem.mapper.OrderMapper;
 
 @Service
 public class OrderService {
@@ -20,17 +20,22 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final AuthService authService;
 
-    public OrderService(OrderRepository orderRepository, ProductRepository productRepository, UserRepository userRepository) {
+    public OrderService(OrderRepository orderRepository,
+                        ProductRepository productRepository,
+                        UserRepository userRepository,
+                        AuthService authService) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.authService = authService;
     }
 
     @Transactional(readOnly = true)
     public List<OrderResponseDTO> getAll() {
         // 1. Obtener el nombre del usuario logueado
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUsername = authService.getCurrentUsername();
         
         // 2. Buscar al usuario para conocer su rol
         User user = userRepository.findByUsername(currentUsername)
@@ -40,26 +45,21 @@ public class OrderService {
 
         // 3. Lógica de visibilidad
         if (user.getRole() == Role.ADMIN) {
-            orders = orderRepository.findAll(); // Admin ve todo
+            orders = orderRepository.findAllWithProducts();
         } else {
-            orders = user.getOrders(); // User ve solo sus pedidos (Funciona gracias al @Transactional)
+            orders = orderRepository.findByUserUsernameWithProducts(currentUsername);
         }
 
         // 4. Mapeo a DTO
         return orders.stream()
-            .map(order -> new OrderResponseDTO(
-                order.getId(),
-                order.getProducts().stream().map(Product::getName).toList(),
-                order.getUser().getUsername(),
-                order.getCreatedAt() // <-- nueva línea
-            ))
+            .map(OrderMapper::toDTO)
             .toList();
     }
 
     @Transactional
     public OrderResponseDTO create(OrderRequestDTO dto) {
         // 1. Obtener usuario actual
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUsername = authService.getCurrentUsername();
         User user = userRepository.findByUsername(currentUsername)
             .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
@@ -78,12 +78,7 @@ public class OrderService {
 
         Order saved = orderRepository.save(order);
 
-        return new OrderResponseDTO(
-            saved.getId(), 
-            saved.getProducts().stream().map(Product::getName).toList(), 
-            saved.getUser().getUsername(),
-            saved.getCreatedAt()
-        );
+        return OrderMapper.toDTO(saved);
     }
 
     @Transactional
@@ -93,7 +88,7 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Orden no encontrada con id: " + id));
 
         // 2. Obtener usuario actual
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        String currentUsername = authService.getCurrentUsername();
         User currentUser = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario autenticado no encontrado"));
 

@@ -12,6 +12,7 @@ import ordersystem.repository.UserRepository;
 import ordersystem.security.JwtService;
 import ordersystem.model.User;
 import ordersystem.dto.UserResponseDTO;
+import ordersystem.mapper.UserMapper;
 import ordersystem.dto.LoginDTO;
 import ordersystem.dto.RegisterDTO;
 import ordersystem.model.Role;
@@ -40,6 +41,14 @@ public class UserService {
             throw new RuntimeException("El nombre de usuario ya está tomado");
         }
 
+        if (repository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new RuntimeException("El email ya está registrado");
+        }
+
+        if (repository.findByDni(dto.getDni()).isPresent()) {
+            throw new RuntimeException("El DNI ya está registrado");
+        }
+
         // 2. Crear la ENTIDAD a partir del DTO
         User user = new User(
             dto.getUsername(),
@@ -55,10 +64,7 @@ public class UserService {
         User saved = repository.save(user);
 
         // 4. Retornar el DTO de respuesta (para no mostrar la password)
-        return new UserResponseDTO(
-            saved.getUsername(),
-            saved.getRole()
-        );
+        return UserMapper.toDTO(saved);
     }
 
     public Map<String, String> login(LoginDTO dto) {
@@ -71,7 +77,13 @@ public class UserService {
         );
 
         // 2. Generar token
-        String token = jwtService.generateToken(dto.getUsername());
+        User user = repository.findByUsername(dto.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        String token = jwtService.generateToken(
+                user.getUsername(),
+                user.getRole().name()
+        );
 
         // 3. Devolver token
         Map<String, String> response = new HashMap<>();
@@ -82,7 +94,7 @@ public class UserService {
 
     public List<UserResponseDTO> getAll() {
         return repository.findAll().stream()
-                .map(user -> new UserResponseDTO(user.getUsername(), user.getRole()))
+                .map(UserMapper::toDTO)
                 .toList();
     }
 }

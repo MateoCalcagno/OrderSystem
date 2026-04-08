@@ -4,7 +4,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import ordersystem.repository.ProductRepository;
+import ordersystem.dto.ProductRequestDTO;
+import ordersystem.dto.ProductResponseDTO;
 import ordersystem.exception.ResourceNotFoundException;
+import ordersystem.mapper.ProductMapper;
 import ordersystem.model.Product;
 
 @Service
@@ -16,27 +19,33 @@ public class ProductService {
         this.repository = repository;
     }
 
-    public List<Product> getAll() {
-        return repository.findAll();
+    public List<ProductResponseDTO> getAll() {
+        return repository.findAll().stream()
+            .map(ProductMapper::toDTO)
+            .toList();
     }
 
-    public Product create(Product product) {
+    public ProductResponseDTO create(ProductRequestDTO dto) {
+        Product product = ProductMapper.toEntity(dto);
         product.setName(capitalize(product.getName()));
-        return repository.save(product);
+
+        return ProductMapper.toDTO(repository.save(product));
     }
 
-    public Product getById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
+    public ProductResponseDTO getById(Long id) {
+        Product product = repository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
+
+        return ProductMapper.toDTO(product);
     }
 
-    public Product update(Long id, Product updatedProduct) {
-        return repository.findById(id)
-                .map(product -> {
-                    product.setName(capitalize(updatedProduct.getName()));
-                    return repository.save(product);
-                })
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
+    public ProductResponseDTO update(Long id, ProductRequestDTO dto) {
+        Product product = repository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
+
+        product.setName(capitalize(dto.getName()));
+
+        return ProductMapper.toDTO(repository.save(product));
     }
 
     public void delete(Long id) {

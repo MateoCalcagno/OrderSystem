@@ -5,56 +5,40 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.security.access.AccessDeniedException;
 
-import java.util.HashMap;
-import java.util.Map;
+import ordersystem.dto.ErrorResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, Object> handleNotFound(ResourceNotFoundException ex) {
-
-        Map<String, Object> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        error.put("status", 404);
-
-        return error;
+    public ErrorResponse handleNotFound(ResourceNotFoundException ex) {
+        return new ErrorResponse(ex.getMessage(), 404);
     }
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Object> handleRuntime(RuntimeException ex) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        error.put("status", 400);
-        return error;
+    public ErrorResponse handleRuntime(RuntimeException ex) {
+        return new ErrorResponse(ex.getMessage(), 400);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Object> handleValidation(MethodArgumentNotValidException ex) {
+    public ErrorResponse handleValidation(MethodArgumentNotValidException ex) {
 
-        Map<String, Object> error = new HashMap<>();
-        error.put("status", 400);
+        String message = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .findFirst()
+                .orElse("Error de validación");
 
-        Map<String, String> fields = new HashMap<>();
-
-        ex.getBindingResult().getFieldErrors().forEach(err ->
-            fields.put(err.getField(), err.getDefaultMessage())
-        );
-
-        error.put("errors", fields);
-
-        return error;
+        return new ErrorResponse(message, 400);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public Map<String, Object> handleAccessDenied(AccessDeniedException ex) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        error.put("status", 403);
-        return error;
+    public ErrorResponse handleAccessDenied(AccessDeniedException ex) {
+        return new ErrorResponse(ex.getMessage(), 403);
     }
 }

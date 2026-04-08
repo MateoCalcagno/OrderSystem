@@ -1,13 +1,16 @@
 package ordersystem.controller;
 
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 import ordersystem.service.ProductService;
-import ordersystem.model.Product;
+import ordersystem.dto.ProductResponseDTO;
+import ordersystem.dto.ProductRequestDTO;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/products")
 public class ProductController {
 
@@ -18,23 +21,23 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getAll() {
+    public List<ProductResponseDTO> getAll() {
         return service.getAll();
     }
 
     @PostMapping
-    public Product create(@RequestBody Product product) {
-        return service.create(product);
+    public ProductResponseDTO create(@RequestBody @Valid ProductRequestDTO dto) {
+        return service.create(dto);
     }
 
     @GetMapping("/{id}")
-    public Product getById(@PathVariable Long id) {
+    public ProductResponseDTO getById(@PathVariable Long id) {
         return service.getById(id);
     }
 
     @PutMapping("/{id}")
-    public Product update(@PathVariable Long id, @RequestBody Product product) {
-        return service.update(id, product);
+    public ProductResponseDTO update(@PathVariable Long id, @RequestBody @Valid ProductRequestDTO dto) {
+        return service.update(id, dto);
     }
 
     @DeleteMapping("/{id}")

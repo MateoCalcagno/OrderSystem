@@ -7,10 +7,10 @@ import ordersystem.model.Role;
 
 public class LoginDTO {
     @NotBlank(message = "El nombre de usuario es obligatorio")
+    @Size(min = 3, message = "Mínimo 3 caracteres")
     private String username;
 
     @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 4, message = "Mínimo 4 caracteres")
     private String password;
 
     private Role role; 

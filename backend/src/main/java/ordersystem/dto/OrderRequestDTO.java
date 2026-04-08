@@ -1,12 +1,14 @@
 package ordersystem.dto;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
 public class OrderRequestDTO {
 
     @NotEmpty(message = "La lista de productos no puede estar vacía")
+    @Size(min = 1, message = "Debe haber al menos un producto")
     private List<Long> productIds;
 
     public List<Long> getProductIds() {

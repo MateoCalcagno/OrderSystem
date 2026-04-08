@@ -1,16 +1,15 @@
 package ordersystem.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public class RegisterDTO {
 
     @NotBlank(message = "El nombre de usuario es obligatorio")
+    @Size(min = 3, max = 20, message = "El username debe tener entre 3 y 20 caracteres")
     private String username;
 
     @NotBlank(message = "La contraseña es obligatoria")
-    @Size(min = 4, message = "Mínimo 4 caracteres")
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
 
     @NotBlank(message = "El email es obligatorio")
@@ -18,12 +17,15 @@ public class RegisterDTO {
     private String email;
 
     @NotBlank(message = "El DNI es obligatorio")
+    @Pattern(regexp = "\\d+", message = "El DNI solo debe contener números")
     private String dni;
 
     @NotBlank(message = "El nombre es obligatorio")
+    @Size(min = 2, message = "El nombre es demasiado corto")
     private String firstName;
 
     @NotBlank(message = "El apellido es obligatorio")
+    @Size(min = 2, message = "El apellido es demasiado corto")
     private String lastName;
 
     // Getters y Setters
