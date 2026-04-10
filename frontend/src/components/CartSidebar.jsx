@@ -1,6 +1,6 @@
 import React from "react";
 import { useAuth } from "../context/AuthContext";
-import api from "../services/api";
+import orderService from "../services/orderService";
 import toast from "react-hot-toast";
 
 function CartSidebar() {
@@ -19,7 +19,7 @@ function CartSidebar() {
         for (let i = 0; i < item.quantity; i++) productIds.push(item.id);
       });
 
-      await api.post("/orders", { productIds });
+      await orderService.create(productIds);
       
       clearCart(); // Limpia el carrito sin recargar
       toast.success("¡Pedido confirmado! 🎉", { id: loadId });

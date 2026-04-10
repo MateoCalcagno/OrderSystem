@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+import userService from "../services/userService";
+import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -15,19 +17,12 @@ function Login() {
     setError("");
 
     try {
-      const response = await api.post("/users/login", { username, password });
-      const { token } = response.data;
-
-      const usersRes = await api.get("/users", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      const foundUser = usersRes.data.find(u => u.username === username);
+      const data = await userService.login(username, password);
 
       login({
-        username,
-        role: foundUser ? foundUser.role : "USER",
-        token
+        username: data.username,
+        role: data.role,
+        token: data.token
       });
 
       navigate("/products");
@@ -54,30 +49,28 @@ function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          <input
+          <Input
             type="text"
             placeholder="Usuario"
-            className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:ring-2 focus:ring-purple-500 outline-none"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
           />
 
-          <input
+          <Input
             type="password"
             placeholder="Contraseña"
-            className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:ring-2 focus:ring-purple-500 outline-none"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
 
-          <button 
+          <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg"
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 hover:scale-105"
           >
             Entrar
-          </button>
+          </Button>
 
           <p className="text-center mt-4 text-sm text-white/70">
             ¿No tenés cuenta?{" "}

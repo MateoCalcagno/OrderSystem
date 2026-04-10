@@ -38,7 +38,7 @@ public class UserService {
     public UserResponseDTO register(RegisterDTO dto) {
         // 1. Validar si el usuario ya existe
         if (repository.findByUsername(dto.getUsername()).isPresent()) {
-            throw new RuntimeException("El nombre de usuario ya está tomado");
+            throw new RuntimeException("El nombre de usuario ya está registrado");
         }
 
         if (repository.findByEmail(dto.getEmail()).isPresent()) {
@@ -67,7 +67,7 @@ public class UserService {
         return UserMapper.toDTO(saved);
     }
 
-    public Map<String, String> login(LoginDTO dto) {
+    public Map<String, Object> login(LoginDTO dto){
         // 1. Autenticar usuario
         authManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -86,8 +86,11 @@ public class UserService {
         );
 
         // 3. Devolver token
-        Map<String, String> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
+
         response.put("token", token);
+        response.put("username", user.getUsername());
+        response.put("role", user.getRole().name());
 
         return response;
     }

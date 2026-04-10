@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+import userService from "../services/userService";
 
 function SignUp() {
   const [formData, setFormData] = useState({
@@ -32,7 +32,7 @@ function SignUp() {
     setSuccess("");
 
     try {
-      await api.post("/users/register", formData);
+      await userService.register(formData);
 
       setSuccess("Cuenta creada con éxito 🎉");
 
