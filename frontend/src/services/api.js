@@ -6,16 +6,27 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
+// REQUEST → agrega token
 api.interceptors.request.use((config) => {
   const savedUser = JSON.parse(localStorage.getItem("user"));
-  
-  // Si existe el usuario y tiene un token, lo mandamos como Bearer
+
   if (savedUser && savedUser.token) {
     config.headers.Authorization = `Bearer ${savedUser.token}`;
   }
+
   return config;
-}, (error) => {
-  return Promise.reject(error);
 });
+
+// RESPONSE → manejar expiración
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
+    return Promise.reject(err);
+  }
+);
 
 export default api;

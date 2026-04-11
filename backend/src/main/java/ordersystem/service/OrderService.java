@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import ordersystem.repository.*;
@@ -64,11 +63,10 @@ public class OrderService {
             .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         // 2. Buscar los productos
-        List<Product> products = new ArrayList<>();
-        for (Long id : dto.getProductIds()) {
-            Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no existe con id: " + id));
-            products.add(product);
+        List<Product> products = productRepository.findAllById(dto.getProductIds());
+
+        if (products.size() != dto.getProductIds().size()) {
+            throw new ResourceNotFoundException("Algún producto no existe");
         }
 
         // 3. Crear y guardar la orden

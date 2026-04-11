@@ -5,13 +5,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import java.util.HashMap;
-import java.util.Map;
 
 import ordersystem.repository.UserRepository;
 import ordersystem.security.JwtService;
 import ordersystem.model.User;
 import ordersystem.dto.UserResponseDTO;
+import ordersystem.dto.AuthResponseDTO;
+import ordersystem.exception.BadRequestException;
 import ordersystem.mapper.UserMapper;
 import ordersystem.dto.LoginDTO;
 import ordersystem.dto.RegisterDTO;
@@ -35,18 +35,18 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
-    public UserResponseDTO register(RegisterDTO dto) {
+    public void register(RegisterDTO dto) {
         // 1. Validar si el usuario ya existe
         if (repository.findByUsername(dto.getUsername()).isPresent()) {
-            throw new RuntimeException("El nombre de usuario ya está registrado");
+            throw new BadRequestException("El nombre de usuario ya está registrado");
         }
 
         if (repository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new RuntimeException("El email ya está registrado");
+            throw new BadRequestException("El email ya está registrado");
         }
 
         if (repository.findByDni(dto.getDni()).isPresent()) {
-            throw new RuntimeException("El DNI ya está registrado");
+            throw new BadRequestException("El DNI ya está registrado");
         }
 
         // 2. Crear la ENTIDAD a partir del DTO
@@ -61,13 +61,10 @@ public class UserService {
         );
 
         // 3. Guardar la ENTIDAD
-        User saved = repository.save(user);
-
-        // 4. Retornar el DTO de respuesta (para no mostrar la password)
-        return UserMapper.toDTO(saved);
+        repository.save(user);
     }
 
-    public Map<String, Object> login(LoginDTO dto){
+    public AuthResponseDTO login(LoginDTO dto){
         // 1. Autenticar usuario
         authManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -78,7 +75,7 @@ public class UserService {
 
         // 2. Generar token
         User user = repository.findByUsername(dto.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new BadRequestException("Usuario no encontrado"));
 
         String token = jwtService.generateToken(
                 user.getUsername(),
@@ -86,13 +83,11 @@ public class UserService {
         );
 
         // 3. Devolver token
-        Map<String, Object> response = new HashMap<>();
-
-        response.put("token", token);
-        response.put("username", user.getUsername());
-        response.put("role", user.getRole().name());
-
-        return response;
+        return new AuthResponseDTO(
+            token,
+            user.getUsername(),
+            user.getRole().name()
+        );
     }
 
     public List<UserResponseDTO> getAll() {

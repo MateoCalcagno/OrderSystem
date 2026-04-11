@@ -41,4 +41,10 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleAccessDenied(AccessDeniedException ex) {
         return new ErrorResponse(ex.getMessage(), 403);
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadRequest(BadRequestException ex) {
+        return new ErrorResponse(ex.getMessage(), 400);
+    }
 }

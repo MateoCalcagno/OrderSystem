@@ -12,6 +12,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -32,37 +35,38 @@ public class JwtFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        // 1. Si no hay token, seguir normal
+        // 1. Si no hay token → seguir normal
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2. Extraer token
         String token = authHeader.substring(7);
 
-        // 3. Extraer username y role desde JWT
-        String username = jwtService.extractUsername(token);
-        String role = jwtService.extractRole(token);
+        try {
+            String username = jwtService.extractUsername(token);
+            String role = jwtService.extractRole(token);
 
-        // 4. Si no hay autenticación previa
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            // 5. Crear autenticación SIN ir a la DB
-            UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                    );
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                username,
+                                null,
+                                List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                        );
 
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-            // 6. Guardar en el contexto de seguridad
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+
+        } catch (ExpiredJwtException e) {
+            // 🔐 token expirado → no autenticamos
+        } catch (JwtException e) {
+            // 🔐 token inválido → no autenticamos
         }
 
-        // 7. Continuar la cadena
         filterChain.doFilter(request, response);
     }
 }
