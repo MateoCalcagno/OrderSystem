@@ -3,8 +3,6 @@ package ordersystem.model;
 import jakarta.persistence.*;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 @Entity
 @Table(name = "users")
 public class User {
@@ -36,7 +34,6 @@ public class User {
 
     // Relación: Un usuario puede tener muchos pedidos
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    @JsonManagedReference
     private List<Order> orders;
 
     public User() {}

@@ -15,7 +15,6 @@ import ordersystem.exception.BadRequestException;
 import ordersystem.mapper.UserMapper;
 import ordersystem.dto.LoginDTO;
 import ordersystem.dto.RegisterDTO;
-import ordersystem.model.Role;
 
 @Service
 public class UserService {
@@ -50,15 +49,7 @@ public class UserService {
         }
 
         // 2. Crear la ENTIDAD a partir del DTO
-        User user = new User(
-            dto.getUsername(),
-            passwordEncoder.encode(dto.getPassword()), // encriptamos directamente
-            Role.USER,  // rol por defecto
-            dto.getEmail(),
-            dto.getDni(),
-            dto.getFirstName(),
-            dto.getLastName()
-        );
+        User user = UserMapper.toEntity(dto, passwordEncoder.encode(dto.getPassword()));
 
         // 3. Guardar la ENTIDAD
         repository.save(user);

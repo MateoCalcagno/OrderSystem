@@ -63,10 +63,16 @@ public class OrderService {
             .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         // 2. Buscar los productos
-        List<Product> products = productRepository.findAllById(dto.getProductIds());
+        List<Long> requestedIds = dto.getProductIds();
+        List<Product> products = productRepository.findAllById(requestedIds);
 
-        if (products.size() != dto.getProductIds().size()) {
-            throw new ResourceNotFoundException("Algún producto no existe");
+        List<Long> foundIds = products.stream().map(Product::getId).toList();
+        List<Long> missingIds = requestedIds.stream()
+            .filter(id -> !foundIds.contains(id))
+            .toList();
+
+        if (!missingIds.isEmpty()) {
+            throw new ResourceNotFoundException("Productos no encontrados: " + missingIds);
         }
 
         // 3. Crear y guardar la orden

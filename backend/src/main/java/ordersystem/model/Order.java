@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -28,7 +26,6 @@ public class Order {
 
     @ManyToOne // Muchos pedidos pertenecen a un usuario
     @JoinColumn(name = "user_id") 
-    @JsonBackReference
     private User user;
 
     public User getUser() { return user; }
