@@ -81,13 +81,13 @@ El proyecto ya está desplegado y se puede usar directamente sin necesidad de in
 
 ADMIN
 + Usuario: admin
-+ Contraseña: 1234
++ Contraseña: 123456
 
 Con esta cuenta se puede acceder a todas las funcionalidades de administrador.
 
 USER
-+ Usuario: juan
-+ Contraseña: 1234
++ Usuario: mateo
++ Contraseña: 123456
 
 Con esta cuenta se puede acceder a todas las funcionalidades de usuario o pueden registrarse con cualquier email y contraseña.
 
