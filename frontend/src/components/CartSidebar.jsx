@@ -1,10 +1,12 @@
 import React from "react";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import orderService from "../services/orderService";
 import toast from "react-hot-toast";
 
 function CartSidebar() {
-  const { cart, updateQuantity, removeFromCart, clearCart, user } = useAuth();
+  const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { user } = useAuth();
 
   if (!user || user.role !== "USER") return null;
 

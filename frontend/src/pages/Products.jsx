@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import { useProducts } from "../hooks/useProducts";
 import toast from "react-hot-toast";
 import { FaTrash } from "react-icons/fa";
@@ -10,7 +11,8 @@ function Products() {
   const [newProduct, setNewProduct] = useState("");
   const [search, setSearch] = useState("");
 
-  const { user, addToCart } = useAuth();
+  const { user } = useAuth();
+  const { addToCart } = useCart();
 
   const filteredProducts = products.filter(p =>
     p.name?.toLowerCase().includes(search.toLowerCase())

@@ -16,10 +16,10 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(ex.getMessage(), 404);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleRuntime(RuntimeException ex) {
-        return new ErrorResponse(ex.getMessage(), 400);
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleGeneric(Exception ex) {
+        return new ErrorResponse("Error interno del servidor", 500);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

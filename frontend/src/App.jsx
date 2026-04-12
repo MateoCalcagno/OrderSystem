@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import Dashboard from "./pages/Dashboard";
@@ -82,9 +83,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <CartProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </CartProvider>
   );
 }
 

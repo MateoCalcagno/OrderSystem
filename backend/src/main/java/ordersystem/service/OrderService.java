@@ -68,8 +68,6 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id)))
             .toList();
 
-       
-
         // 3. Crear y guardar la orden
         Order order = new Order();
         order.setProducts(products);
