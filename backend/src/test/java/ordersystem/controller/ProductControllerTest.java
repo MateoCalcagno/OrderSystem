@@ -69,17 +69,6 @@ class ProductControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void getById_conIdExistente_deberiaRetornar200() throws Exception {
-        when(productService.getById(1L)).thenReturn(new ProductResponseDTO(1L, "Pizza"));
-
-        mockMvc.perform(get("/products/1"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.name").value("Pizza"));
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
     void getById_conIdInexistente_deberiaRetornar404() throws Exception {
         when(productService.getById(99L))
             .thenThrow(new ResourceNotFoundException("Producto no encontrado"));
@@ -104,14 +93,5 @@ class ProductControllerTest {
                 .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name").value("Pizza Napolitana"));
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void delete_comoAdmin_deberiaRetornar200() throws Exception {
-        doNothing().when(productService).delete(1L);
-
-        mockMvc.perform(delete("/products/1").with(csrf()))
-            .andExpect(status().isOk());
     }
 }

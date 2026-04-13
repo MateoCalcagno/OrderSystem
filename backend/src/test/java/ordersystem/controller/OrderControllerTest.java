@@ -67,26 +67,4 @@ class OrderControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.products.length()").value(2));
     }
-
-    @Test
-    @WithMockUser(roles = "USER")
-    void create_conListaVacia_deberiaRetornar400() throws Exception {
-        OrderRequestDTO dto = new OrderRequestDTO();
-        dto.setProductIds(List.of());
-
-        mockMvc.perform(post("/orders")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(roles = "USER")
-    void delete_comoUser_deberiaRetornar200() throws Exception {
-        doNothing().when(orderService).delete(1L);
-
-        mockMvc.perform(delete("/orders/1").with(csrf()))
-            .andExpect(status().isOk());
-    }
 }

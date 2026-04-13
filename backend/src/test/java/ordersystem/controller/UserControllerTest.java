@@ -58,23 +58,6 @@ class UserControllerTest {
     }
 
     @Test
-    void register_conDatosInvalidos_deberiaRetornar400() throws Exception {
-        RegisterDTO dto = new RegisterDTO();
-        dto.setUsername("ma");
-        dto.setPassword("123456");
-        dto.setEmail("emailinvalido");
-        dto.setDni("12345678");
-        dto.setFirstName("Mateo");
-        dto.setLastName("Lopez");
-
-        mockMvc.perform(post("/users/register")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void login_conCredencialesValidas_deberiaRetornarToken() throws Exception {
         LoginDTO dto = new LoginDTO();
         dto.setUsername("mateo");

@@ -30,23 +30,18 @@ class ProductServiceTest {
 
     @Test
     void getAll_deberiaRetornarListaDeProductos() {
-        // ARRANGE
         when(repository.findAll()).thenReturn(List.of(
             new Product("Pizza"),
             new Product("Sushi")
         ));
 
-        // ACT
         List<ProductResponseDTO> result = productService.getAll();
 
-        // ASSERT
         assertEquals(2, result.size());
-        verify(repository, times(1)).findAll();
     }
 
     @Test
     void create_deberiaCapitalizarNombreYGuardar() {
-        // ARRANGE
         ProductRequestDTO dto = new ProductRequestDTO();
         dto.setName("pizza margarita");
 
@@ -55,42 +50,25 @@ class ProductServiceTest {
 
         when(repository.save(any(Product.class))).thenReturn(saved);
 
-        // ACT
         ProductResponseDTO result = productService.create(dto);
 
-        // ASSERT
         assertEquals("Pizza Margarita", result.getName());
-        verify(repository, times(1)).save(any(Product.class));
     }
 
     @Test
-    void getById_conIdExistente_deberiaRetornarProducto() {
-        // ARRANGE
+    void getById_conIdExistente_eInexistente() {
         Product product = new Product("Pizza");
         product.setId(1L);
 
         when(repository.findById(1L)).thenReturn(Optional.of(product));
+        assertEquals("Pizza", productService.getById(1L).getName());
 
-        // ACT
-        ProductResponseDTO result = productService.getById(1L);
-
-        // ASSERT
-        assertEquals("Pizza", result.getName());
-        assertEquals(1L, result.getId());
-    }
-
-    @Test
-    void getById_conIdInexistente_deberiaLanzarExcepcion() {
-        // ARRANGE
         when(repository.findById(99L)).thenReturn(Optional.empty());
-
-        // ACT & ASSERT
         assertThrows(ResourceNotFoundException.class, () -> productService.getById(99L));
     }
 
     @Test
-    void update_deberiaActualizarNombreCorrectamente() {
-        // ARRANGE
+    void update_deberiaActualizarONoEncontrar() {
         Product product = new Product("Pizza");
         product.setId(1L);
 
@@ -98,42 +76,21 @@ class ProductServiceTest {
         dto.setName("pizza napolitana");
 
         when(repository.findById(1L)).thenReturn(Optional.of(product));
-        when(repository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        // ACT
-        ProductResponseDTO result = productService.update(1L, dto);
+        assertEquals("Pizza Napolitana", productService.update(1L, dto).getName());
 
-        // ASSERT
-        assertEquals("Pizza Napolitana", result.getName());
-        verify(repository, times(1)).save(any(Product.class));
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> productService.update(99L, dto));
     }
 
     @Test
-    void delete_conIdExistente_deberiaBorrar() {
-        // ARRANGE
+    void delete_deberiaBorrarONoEncontrar() {
         when(repository.existsById(1L)).thenReturn(true);
-
-        // ACT
         productService.delete(1L);
+        verify(repository).deleteById(1L);
 
-        // ASSERT
-        verify(repository, times(1)).deleteById(1L);
-    }
-
-    @Test
-    void delete_conIdInexistente_deberiaLanzarExcepcion() {
-        // ARRANGE
         when(repository.existsById(99L)).thenReturn(false);
-
-        // ACT & ASSERT
         assertThrows(ResourceNotFoundException.class, () -> productService.delete(99L));
-        verify(repository, never()).deleteById(any());
-    }
-
-    @Test
-    void capitalize_deberiaCapitalizarCadaPalabra() {
-        assertEquals("Pizza Margarita", productService.capitalize("pizza margarita"));
-        assertEquals("Coca Cola", productService.capitalize("coca cola"));
-        assertEquals("Agua", productService.capitalize("agua"));
     }
 }

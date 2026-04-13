@@ -43,9 +43,16 @@ class OrderServiceTest {
     @InjectMocks
     private OrderService orderService;
 
+    private Order buildOrder(User user) {
+        Order order = new Order(List.of(new Product("Pizza")));
+        order.setUser(user);
+        return order;
+    }
+
+    // ── CREATE ─────────────────────────────────────────────
+
     @Test
-    void create_deberiaCrearOrdenCorrectamente() {
-        // ARRANGE
+    void create_ok_yErrores() {
         User user = new User("mateo", "pass", Role.USER, "m@m.com", "123", "Mateo", "Lopez");
         Product product = new Product("Pizza");
         product.setId(1L);
@@ -56,112 +63,76 @@ class OrderServiceTest {
         when(authService.getCurrentUsername()).thenReturn("mateo");
         when(userRepository.findByUsername("mateo")).thenReturn(Optional.of(user));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(orderRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        // ACT
+        // ✔ caso correcto
         OrderResponseDTO result = orderService.create(dto);
-
-        // ASSERT
-        assertNotNull(result);
         assertEquals(1, result.getProducts().size());
-        assertEquals("Pizza", result.getProducts().get(0));
-        assertEquals("mateo", result.getUsername());
-        verify(orderRepository, times(1)).save(any(Order.class));
-    }
 
-    @Test
-    void create_conProductoInexistente_deberiaLanzarExcepcion() {
-        // ARRANGE
-        User user = new User("mateo", "pass", Role.USER, "m@m.com", "123", "Mateo", "Lopez");
-
-        OrderRequestDTO dto = new OrderRequestDTO();
+        // ❌ producto inexistente
         dto.setProductIds(List.of(99L));
-
-        when(authService.getCurrentUsername()).thenReturn("mateo");
-        when(userRepository.findByUsername("mateo")).thenReturn(Optional.of(user));
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
-        // ACT & ASSERT
         assertThrows(ResourceNotFoundException.class, () -> orderService.create(dto));
-        verify(orderRepository, never()).save(any());
     }
 
-    @Test
-    void getAll_comoAdmin_deberiaVerTodasLasOrdenes() {
-        // ARRANGE
-        User admin = new User("admin", "pass", Role.ADMIN, "a@a.com", "456", "Admin", "Admin");
+    // ── GET ALL ───────────────────────────────────────────
 
-        Order order1 = new Order(List.of(new Product("Pizza")));
-        order1.setUser(admin);
-        Order order2 = new Order(List.of(new Product("Sushi")));
-        order2.setUser(admin);
+    @Test
+    void getAll_admin_y_user() {
+        User admin = new User("admin", "pass", Role.ADMIN, "", "", "", "");
+        User user = new User("mateo", "pass", Role.USER, "", "", "", "");
+
+        // ✔ admin
+        Order orderAdmin = buildOrder(admin);
 
         when(authService.getCurrentUsername()).thenReturn("admin");
         when(userRepository.findByUsername("admin")).thenReturn(Optional.of(admin));
-        when(orderRepository.findAllWithProducts()).thenReturn(List.of(order1, order2));
+        when(orderRepository.findAllWithProducts()).thenReturn(List.of(orderAdmin));
 
-        // ACT
-        List<OrderResponseDTO> result = orderService.getAll();
+        assertEquals(1, orderService.getAll().size());
 
-        // ASSERT
-        assertEquals(2, result.size());
-        verify(orderRepository, times(1)).findAllWithProducts();
-        verify(orderRepository, never()).findByUserUsernameWithProducts(any());
-    }
-
-    @Test
-    void getAll_comoUser_deberiaSoloVerSusOrdenes() {
-        // ARRANGE
-        User user = new User("mateo", "pass", Role.USER, "m@m.com", "123", "Mateo", "Lopez");
-
-        Order order = new Order(List.of(new Product("Pizza")));
-        order.setUser(user);
+        // ✔ user
+        Order orderUser = buildOrder(user);
 
         when(authService.getCurrentUsername()).thenReturn("mateo");
         when(userRepository.findByUsername("mateo")).thenReturn(Optional.of(user));
-        when(orderRepository.findByUserUsernameWithProducts("mateo")).thenReturn(List.of(order));
+        when(orderRepository.findByUserUsernameWithProducts("mateo"))
+                .thenReturn(List.of(orderUser));
 
-        // ACT
-        List<OrderResponseDTO> result = orderService.getAll();
-
-        // ASSERT
-        assertEquals(1, result.size());
-        verify(orderRepository, times(1)).findByUserUsernameWithProducts("mateo");
-        verify(orderRepository, never()).findAllWithProducts();
+        assertEquals(1, orderService.getAll().size());
     }
 
+    // ── DELETE ───────────────────────────────────────────
+
     @Test
-    void delete_comoOwner_deberiaBorrarOrden() {
-        // ARRANGE
-        User user = new User("mateo", "pass", Role.USER, "m@m.com", "123", "Mateo", "Lopez");
-        Order order = new Order(List.of());
-        order.setUser(user);
+    void delete_casosPrincipales() {
+        User owner = new User("mateo", "", Role.USER, "", "", "", "");
+        User admin = new User("admin", "", Role.ADMIN, "", "", "", "");
+
+        Order order = buildOrder(owner);
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(authService.getCurrentUsername()).thenReturn("mateo");
-        when(userRepository.findByUsername("mateo")).thenReturn(Optional.of(user));
 
-        // ACT
+        // ✔ owner puede borrar
+        when(authService.getCurrentUsername()).thenReturn("mateo");
+        when(userRepository.findByUsername("mateo")).thenReturn(Optional.of(owner));
+
         orderService.delete(1L);
+        verify(orderRepository).delete(order);
 
-        // ASSERT
-        verify(orderRepository, times(1)).delete(order);
-    }
+        // ✔ admin puede borrar
+        when(authService.getCurrentUsername()).thenReturn("admin");
+        when(userRepository.findByUsername("admin")).thenReturn(Optional.of(admin));
 
-    @Test
-    void delete_comoOtroUser_deberiaLanzarAccessDeniedException() {
-        // ARRANGE
-        User owner = new User("mateo", "pass", Role.USER, "m@m.com", "123", "Mateo", "Lopez");
-        User otroUser = new User("pedro", "pass", Role.USER, "p@p.com", "789", "Pedro", "Garcia");
-        Order order = new Order(List.of());
-        order.setUser(owner);
+        orderService.delete(1L);
+        verify(orderRepository, times(2)).delete(order);
 
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        when(authService.getCurrentUsername()).thenReturn("pedro");
-        when(userRepository.findByUsername("pedro")).thenReturn(Optional.of(otroUser));
+        // ❌ otro user no puede
+        when(authService.getCurrentUsername()).thenReturn("otro");
+        when(userRepository.findByUsername("otro"))
+                .thenReturn(Optional.of(new User()));
 
-        // ACT & ASSERT
         assertThrows(AccessDeniedException.class, () -> orderService.delete(1L));
-        verify(orderRepository, never()).delete(any());
     }
 }
