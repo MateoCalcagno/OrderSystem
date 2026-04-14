@@ -39,7 +39,7 @@ class UserControllerTest {
     private JwtService jwtService;
 
     @Test
-    void register_conDatosValidos_deberiaRetornar200() throws Exception {
+    void register_conDatosValidos_deberiaRetornar204() throws Exception {
         RegisterDTO dto = new RegisterDTO();
         dto.setUsername("mateo");
         dto.setPassword("123456");
@@ -54,7 +54,7 @@ class UserControllerTest {
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
     }
 
     @Test

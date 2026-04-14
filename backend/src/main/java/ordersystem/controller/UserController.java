@@ -1,5 +1,6 @@
 package ordersystem.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -21,12 +22,13 @@ public class UserController {
     }
 
     @PostMapping("/register")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void register(@RequestBody @Valid RegisterDTO dto) {
         service.register(dto);
     }
 
     @PostMapping("/login")
-    public AuthResponseDTO login(@RequestBody LoginDTO dto) {
+    public AuthResponseDTO login(@RequestBody @Valid LoginDTO dto) {
         return service.login(dto);
     }
 
