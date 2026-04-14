@@ -2,7 +2,7 @@
 
 Aplicación **fullstack** para la gestión de productos y órdenes con autenticación segura, roles de usuario y dashboard de estadísticas.
 
-🚧 Proyecto en desarrollo activo (mejoras continuas y nuevas funcionalidades)
+✅ Proyecto funcional desplegado en producción con mejoras continuas
 
 ---
 
@@ -123,27 +123,30 @@ Con esta cuenta se puede acceder a todas las funcionalidades de usuario o pueden
 
 ---
 
-## 🎯 Objetivo del proyecto
+### 🧪 Testing
 
-Este proyecto fue desarrollado para:
+El proyecto incluye diferentes niveles de testing:
 
-* Practicar desarrollo fullstack
-* Implementar autenticación y seguridad real
-* Aplicar buenas prácticas (DTOs, capas, validaciones)
-* Simular un sistema de pedidos real
+- Unit Tests → lógica de negocio (services)
+- Controller Tests → validación de endpoints con MockMvc
+- Integration Tests → flujo completo con seguridad, base de datos y autenticación real
+
+---
+
+## 📚 Aprendizajes
+
+- Implementación de autenticación segura con JWT
+- Manejo de roles y autorización en backend
+- Testing en múltiples capas (unit, controller, integration)
+- Comunicación frontend-backend mediante APIs REST
+- Manejo de estado global en React
+- Deploy de aplicaciones fullstack (Vercel + Render)
 
 ---
 
 ## 👨‍💻 Autor
 
 **Mateo Calcagno**
-
----
-
-## 📌 Estado del proyecto
-
-🚧 En desarrollo 
-
 
 ---
 
