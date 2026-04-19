@@ -35,6 +35,11 @@ public class SecurityConfig {
                 .requestMatchers("/health").permitAll() // UptimeRobot
                 .requestMatchers("/users/register").permitAll()                // Registro libre
                 .requestMatchers("/users/login").permitAll()       // Permitir Login
+                .requestMatchers(
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui.html"
+                ).permitAll()
                 .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/products/**").hasAnyRole("USER", "ADMIN") // GET productos
                 .requestMatchers(HttpMethod.POST, "/products/**").hasRole("ADMIN")          // Crear producto solo admin
