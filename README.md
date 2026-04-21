@@ -17,6 +17,8 @@ Aplicación **fullstack** para la gestión de productos y órdenes con autentica
 * 📊 Dashboard con estadísticas de ventas
 * 🔎 Búsqueda de productos y órdenes
 * ⚡ Interfaz moderna y responsive
+* 💰 Precios por producto y total por orden
+* 📄 Paginación en productos y órdenes
 
 ---
 
@@ -32,6 +34,7 @@ Aplicación **fullstack** para la gestión de productos y órdenes con autentica
 * PostgreSQL
 * Arquitectura REST
 * Validaciones con Jakarta Validation
+* Paginación 
 
 ---
 
@@ -55,8 +58,14 @@ El proyecto sigue una arquitectura en capas:
 * **Controller** → Manejo de endpoints REST
 * **Service** → Lógica de negocio
 * **Repository** → Acceso a datos (JPA)
-* **DTOs** → Transferencia de datos
+
+🧩 Componentes de soporte
+
+* **DTO** → Transferencia de datos entre capas
+* **Mapper** → Conversión entre entidades y DTOs
+* **Model** → Entidades JPA (User, Product, Order)
 * **Security** → JWT + filtros + roles
+* **Exception** → Manejo centralizado de errores (GlobalExceptionHandler)
 
 ---
 
