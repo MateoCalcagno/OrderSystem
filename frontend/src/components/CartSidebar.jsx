@@ -23,7 +23,7 @@ function CartSidebar() {
 
       await orderService.create(productIds);
       
-      clearCart(); // Limpia el carrito sin recargar
+      clearCart();
       toast.success("¡Pedido confirmado! 🎉", { id: loadId });
       
     } catch (err) {
@@ -58,6 +58,15 @@ function CartSidebar() {
                   className="text-red-400 hover:text-red-500 transition-colors"
                 >✕</button>
               </div>
+
+              {/* 💰 precio unitario x cantidad */}
+              <div className="flex justify-between items-center px-1">
+                <span className="text-white/30 text-[10px]">${item.price?.toFixed(2)} c/u</span>
+                <span className="text-green-400 text-xs font-bold">
+                  ${(item.price * item.quantity).toFixed(2)}
+                </span>
+              </div>
+
               <div className="flex items-center justify-between bg-black/30 rounded-lg p-1">
                 <button onClick={() => updateQuantity(item.id, -1)} className="w-7 h-7 flex items-center justify-center hover:bg-white/10 rounded-md">-</button>
                 <span className="text-purple-400 font-black text-sm">{item.quantity}</span>
@@ -70,6 +79,15 @@ function CartSidebar() {
 
       {cart.length > 0 && (
         <div className="p-4 bg-white/5 border-t border-white/10">
+
+          {/* 💰 total */}
+          <div className="flex justify-between items-center mb-3 px-1">
+            <span className="text-white/40 text-xs uppercase tracking-widest">Total</span>
+            <span className="text-white font-black text-lg">
+              ${cart.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)}
+            </span>
+          </div>
+
           <button 
             onClick={handleCreateOrder} 
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-4 rounded-xl font-black text-white text-xs uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-95 transition-all"

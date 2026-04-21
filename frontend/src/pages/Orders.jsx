@@ -57,7 +57,7 @@ function Orders() {
           filteredOrders.map((o) => (
             <div
               key={o.id}
-              className="bg-white/5 p-4 px-6 rounded-2xl border border-white/5 grid grid-cols-3 items-center gap-4 text-white hover:bg-white/10 transition-all group"
+              className="bg-white/5 p-4 px-6 rounded-2xl border border-white/5 grid grid-cols-4 items-center gap-4 text-white hover:bg-white/10 transition-all group"
             >
               
               {/* 🧾 INFO */}
@@ -88,6 +88,16 @@ function Orders() {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
+                </p>
+              </div>
+
+              {/* 💰 TOTAL */}
+              <div className="text-center">
+                <p className="text-sm font-bold text-green-400">
+                  ${o.totalPrice?.toFixed(2) ?? "—"}
+                </p>
+                <p className="text-[10px] text-white/20 uppercase tracking-widest mt-0.5">
+                  total
                 </p>
               </div>
 

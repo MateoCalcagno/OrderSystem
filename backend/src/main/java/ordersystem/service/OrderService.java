@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import ordersystem.repository.*;
@@ -57,25 +58,25 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDTO create(OrderRequestDTO dto) {
-        // 1. Obtener usuario actual
         String currentUsername = authService.getCurrentUsername();
         User user = userRepository.findByUsername(currentUsername)
             .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
-        // 2. Buscar los productos
         List<Product> products = dto.getProductIds().stream()
             .map(id -> productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id)))
             .toList();
 
-        // 3. Crear y guardar la orden
+        BigDecimal total = products.stream()
+            .map(Product::getPrice)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         Order order = new Order();
         order.setProducts(products);
-        order.setUser(user); 
+        order.setUser(user);
+        order.setTotalPrice(total); 
 
-        Order saved = orderRepository.save(order);
-
-        return OrderMapper.toDTO(saved);
+        return OrderMapper.toDTO(orderRepository.save(order));
     }
 
     @Transactional

@@ -13,7 +13,8 @@ public class OrderMapper {
                 .map(Product::getName)
                 .toList(),
             order.getUser().getUsername(),
-            order.getCreatedAt()
+            order.getCreatedAt(),
+            order.getTotalPrice() 
         );
     }
 }

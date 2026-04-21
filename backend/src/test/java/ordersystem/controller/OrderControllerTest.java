@@ -13,6 +13,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -41,13 +42,14 @@ class OrderControllerTest {
     @WithMockUser(roles = "USER")
     void getAll_comoUser_deberiaRetornar200() throws Exception {
         when(orderService.getAll()).thenReturn(List.of(
-            new OrderResponseDTO(1L, List.of("Pizza"), "mateo", LocalDateTime.now())
+            new OrderResponseDTO(1L, List.of("Pizza"), "mateo", LocalDateTime.now(), new BigDecimal("10.00"))
         ));
 
         mockMvc.perform(get("/orders"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(1))
-            .andExpect(jsonPath("$[0].username").value("mateo"));
+            .andExpect(jsonPath("$[0].username").value("mateo"))
+            .andExpect(jsonPath("$.totalPrice").value(10.00));
     }
 
     @Test
@@ -57,7 +59,7 @@ class OrderControllerTest {
         dto.setProductIds(List.of(1L, 2L));
 
         when(orderService.create(any())).thenReturn(
-            new OrderResponseDTO(1L, List.of("Pizza", "Sushi"), "mateo", LocalDateTime.now())
+            new OrderResponseDTO(1L, List.of("Pizza", "Sushi"), "mateo", LocalDateTime.now(), new BigDecimal("25.00"))
         );
 
         mockMvc.perform(post("/orders")
@@ -65,6 +67,7 @@ class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.products.length()").value(2));
+            .andExpect(jsonPath("$.products.length()").value(2))
+            .andExpect(jsonPath("$.totalPrice").value(25.00));
     }
 }

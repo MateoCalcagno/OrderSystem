@@ -9,13 +9,15 @@ public class ProductMapper {
     public static ProductResponseDTO toDTO(Product product) {
         return new ProductResponseDTO(
             product.getId(),
-            product.getName()
+            product.getName(),
+            product.getPrice()
         );
     }
 
     public static Product toEntity(ProductRequestDTO dto) {
         Product product = new Product();
         product.setName(dto.getName());
+        product.setPrice(dto.getPrice());
         return product;
     }
 }

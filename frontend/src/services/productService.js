@@ -3,8 +3,8 @@ import request from "./request";
 
 const getAll = () => request(api.get("/products"));
 
-const create = (name) =>
-  request(api.post("/products", { name }));
+const create = (name, price) =>
+  request(api.post("/products", { name, price }));
 
 const remove = (id) => api.delete(`/products/${id}`);
 

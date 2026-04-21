@@ -14,6 +14,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -41,14 +42,15 @@ class ProductControllerTest {
     @WithMockUser(roles = "USER")
     void getAll_comoUser_deberiaRetornar200() throws Exception {
         when(productService.getAll()).thenReturn(List.of(
-            new ProductResponseDTO(1L, "Pizza"),
-            new ProductResponseDTO(2L, "Sushi")
+            new ProductResponseDTO(1L, "Pizza", new BigDecimal("10.00")),
+            new ProductResponseDTO(2L, "Sushi", new BigDecimal("15.00"))
         ));
 
         mockMvc.perform(get("/products"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].name").value("Pizza"));
+            .andExpect(jsonPath("$[0].name").value("Pizza"))
+            .andExpect(jsonPath("$[0].price").value(10.00)); // 👈 podés validar el precio también
     }
 
     @Test
@@ -56,15 +58,17 @@ class ProductControllerTest {
     void create_comoAdmin_deberiaRetornar200() throws Exception {
         ProductRequestDTO dto = new ProductRequestDTO();
         dto.setName("Pizza");
+        dto.setPrice(new BigDecimal("10.00")); // 👈 nuevo
 
-        when(productService.create(any())).thenReturn(new ProductResponseDTO(1L, "Pizza"));
+        when(productService.create(any())).thenReturn(new ProductResponseDTO(1L, "Pizza", new BigDecimal("10.00")));
 
         mockMvc.perform(post("/products")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("Pizza"));
+            .andExpect(jsonPath("$.name").value("Pizza"))
+            .andExpect(jsonPath("$.price").value(10.00)); // 👈 nuevo
     }
 
     @Test
@@ -83,15 +87,17 @@ class ProductControllerTest {
     void update_comoAdmin_deberiaRetornar200() throws Exception {
         ProductRequestDTO dto = new ProductRequestDTO();
         dto.setName("Pizza Napolitana");
+        dto.setPrice(new BigDecimal("12.00")); // 👈 nuevo
 
         when(productService.update(eq(1L), any()))
-            .thenReturn(new ProductResponseDTO(1L, "Pizza Napolitana"));
+            .thenReturn(new ProductResponseDTO(1L, "Pizza Napolitana", new BigDecimal("12.00")));
 
         mockMvc.perform(put("/products/1")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("Pizza Napolitana"));
+            .andExpect(jsonPath("$.name").value("Pizza Napolitana"))
+            .andExpect(jsonPath("$.price").value(12.00)); // 👈 nuevo
     }
 }

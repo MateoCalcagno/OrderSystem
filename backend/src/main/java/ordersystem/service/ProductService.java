@@ -44,6 +44,7 @@ public class ProductService {
             .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 
         product.setName(capitalize(dto.getName()));
+        product.setPrice(dto.getPrice()); 
 
         return ProductMapper.toDTO(repository.save(product));
     }

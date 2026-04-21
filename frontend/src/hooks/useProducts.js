@@ -14,15 +14,19 @@ export const useProducts = () => {
     }
   };
 
-  const createProduct = async (name) => {
+  const createProduct = async (name, price) => {
     if (!name.trim()) return;
+    if (!price || isNaN(price) || Number(price) <= 0) {
+      toast.error("El precio debe ser mayor a 0");
+      return;
+    }
 
     try {
-      const created = await productService.create(name);
+      const created = await productService.create(name, Number(price));
       setProducts(prev => [...prev, created]);
       toast.success("Producto creado 🏷️");
     } catch {
-      toast.error("Solo administradores");
+      toast.error("Error al crear el producto");
     }
   };
 
