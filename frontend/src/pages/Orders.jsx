@@ -4,7 +4,7 @@ import { useOrders } from "../hooks/useOrders";
 import { FaTrash } from "react-icons/fa";
 
 function Orders() {
-  const { orders, deleteOrder } = useOrders();
+  const { orders, deleteOrder, currentPage, totalPages, loadOrders } = useOrders();
 
   const [search, setSearch] = useState("");
   const { user } = useAuth();
@@ -118,6 +118,27 @@ function Orders() {
         )}
 
       </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-3 mt-4 pt-4 border-t border-white/10">
+          <button
+            onClick={() => loadOrders(currentPage - 1)}
+            disabled={currentPage === 0}
+            className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+          >
+            ←
+          </button>
+          <span className="text-white/40 text-xs">
+            {currentPage + 1} / {totalPages}
+          </span>
+          <button
+            onClick={() => loadOrders(currentPage + 1)}
+            disabled={currentPage === totalPages - 1}
+            className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+          >
+            →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

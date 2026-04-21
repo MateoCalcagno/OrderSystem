@@ -4,11 +4,15 @@ import toast from "react-hot-toast";
 
 export const useOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const loadOrders = async () => {
+  const loadOrders = async (page = 0) => {
     try {
-      const data = await orderService.getAll();
-      setOrders(data);
+      const data = await orderService.getAll(page);
+      setOrders(data.content);
+      setTotalPages(data.totalPages);
+      setCurrentPage(data.number);
     } catch {
       toast.error("Error al cargar órdenes");
     }
@@ -30,6 +34,9 @@ export const useOrders = () => {
 
   return {
     orders,
-    deleteOrder
+    deleteOrder,
+    currentPage,
+    totalPages,
+    loadOrders
   };
 };

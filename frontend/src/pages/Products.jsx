@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { FaTrash } from "react-icons/fa";
 
 function Products() {
-  const { products, createProduct, deleteProduct } = useProducts();
+  const { products, createProduct, deleteProduct, currentPage, totalPages, loadProducts } = useProducts();
 
   const [newProduct, setNewProduct] = useState({ name: "", price: "" });
   const [search, setSearch] = useState("");
@@ -47,7 +47,7 @@ function Products() {
             className="w-28 p-3 rounded-xl bg-white/5 border border-white/20 text-white"
             value={newProduct.price}
             onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-            placeholder="Precio..."
+            placeholder="$..."
             type="number"
             min="0.01"
             step="0.01"
@@ -73,8 +73,10 @@ function Products() {
               key={p.id}
               className="bg-white/5 p-4 rounded-xl border border-white/5 flex justify-between items-center hover:bg-white/10 transition-all group"
             >
-              <span className="text-white font-medium">{p.name}</span>
-              <span className="text-white/50 text-sm">${p.price}</span> 
+              <div className="flex flex-col">
+                <span className="text-white font-medium">{p.name}</span>
+                <span className="text-green-400/70 text-xs font-bold">${p.price?.toFixed(2)}</span>
+              </div>
 
               <div className="flex items-center gap-2">
 
@@ -107,6 +109,27 @@ function Products() {
 
         </div>
       </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-3 mt-4 pt-4 border-t border-white/10">
+          <button
+            onClick={() => loadProducts(currentPage - 1)}
+            disabled={currentPage === 0}
+            className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+          >
+            ←
+          </button>
+          <span className="text-white/40 text-xs">
+            {currentPage + 1} / {totalPages}
+          </span>
+          <button
+            onClick={() => loadProducts(currentPage + 1)}
+            disabled={currentPage === totalPages - 1}
+            className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+          >
+            →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

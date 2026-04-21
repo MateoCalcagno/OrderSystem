@@ -5,6 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import ordersystem.dto.ProductRequestDTO;
 import ordersystem.dto.ProductResponseDTO;
@@ -12,6 +14,9 @@ import ordersystem.exception.ResourceNotFoundException;
 import ordersystem.model.Product;
 import ordersystem.repository.ProductRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,15 +34,21 @@ class ProductServiceTest {
     private ProductService productService;
 
     @Test
-    void getAll_deberiaRetornarListaDeProductos() {
-        when(repository.findAll()).thenReturn(List.of(
-            new Product("Pizza"),
-            new Product("Sushi")
-        ));
+    void getAll_deberiaRetornarPaginaDeProductos() {
+        Product pizza = new Product("Pizza");
+        pizza.setPrice(new BigDecimal("10.00"));
+        Product sushi = new Product("Sushi");
+        sushi.setPrice(new BigDecimal("15.00"));
 
-        List<ProductResponseDTO> result = productService.getAll();
+        Pageable pageable = PageRequest.of(0, 10);
 
-        assertEquals(2, result.size());
+        when(repository.findAll(pageable)).thenReturn(
+            new PageImpl<>(List.of(pizza, sushi))
+        );
+
+        Page<ProductResponseDTO> result = productService.getAll(pageable);
+
+        assertEquals(2, result.getContent().size());
     }
 
     @Test

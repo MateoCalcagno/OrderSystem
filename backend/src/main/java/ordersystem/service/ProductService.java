@@ -1,7 +1,6 @@
 package ordersystem.service;
 
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 import ordersystem.repository.ProductRepository;
 import ordersystem.dto.ProductRequestDTO;
@@ -9,6 +8,9 @@ import ordersystem.dto.ProductResponseDTO;
 import ordersystem.exception.ResourceNotFoundException;
 import ordersystem.mapper.ProductMapper;
 import ordersystem.model.Product;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class ProductService {
@@ -19,10 +21,9 @@ public class ProductService {
         this.repository = repository;
     }
 
-    public List<ProductResponseDTO> getAll() {
-        return repository.findAll().stream()
-            .map(ProductMapper::toDTO)
-            .toList();
+    public Page<ProductResponseDTO> getAll(Pageable pageable) {
+        return repository.findAll(pageable)
+            .map(ProductMapper::toDTO);
     }
 
     public ProductResponseDTO create(ProductRequestDTO dto) {

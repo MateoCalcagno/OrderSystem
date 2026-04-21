@@ -5,6 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 
 import ordersystem.dto.OrderRequestDTO;
@@ -83,24 +86,27 @@ class OrderServiceTest {
         User admin = new User("admin", "pass", Role.ADMIN, "", "", "", "");
         User user = new User("mateo", "pass", Role.USER, "", "", "", "");
 
+        Pageable pageable = PageRequest.of(0, 10);
+
         // ✔ admin
         Order orderAdmin = buildOrder(admin);
 
         when(authService.getCurrentUsername()).thenReturn("admin");
         when(userRepository.findByUsername("admin")).thenReturn(Optional.of(admin));
-        when(orderRepository.findAllWithProducts()).thenReturn(List.of(orderAdmin));
+        when(orderRepository.findAllWithProducts(pageable))
+            .thenReturn(new PageImpl<>(List.of(orderAdmin)));
 
-        assertEquals(1, orderService.getAll().size());
+        assertEquals(1, orderService.getAll(pageable).getContent().size());
 
         // ✔ user
         Order orderUser = buildOrder(user);
 
         when(authService.getCurrentUsername()).thenReturn("mateo");
         when(userRepository.findByUsername("mateo")).thenReturn(Optional.of(user));
-        when(orderRepository.findByUserUsernameWithProducts("mateo"))
-                .thenReturn(List.of(orderUser));
+        when(orderRepository.findByUserUsernameWithProducts("mateo", pageable))
+            .thenReturn(new PageImpl<>(List.of(orderUser)));
 
-        assertEquals(1, orderService.getAll().size());
+        assertEquals(1, orderService.getAll(pageable).getContent().size());
     }
 
     // ── DELETE ───────────────────────────────────────────

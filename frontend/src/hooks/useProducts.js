@@ -4,11 +4,15 @@ import toast from "react-hot-toast";
 
 export const useProducts = () => {
   const [products, setProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const loadProducts = async () => {
+  const loadProducts = async (page = 0) => {
     try {
-      const data = await productService.getAll();
-      setProducts(data);
+      const data = await productService.getAll(page);
+      setProducts(data.content);       
+      setTotalPages(data.totalPages);
+      setCurrentPage(data.number);
     } catch {
       toast.error("Error al cargar productos");
     }
@@ -47,6 +51,9 @@ export const useProducts = () => {
   return {
     products,
     createProduct,
-    deleteProduct
+    deleteProduct,
+    currentPage,
+    totalPages,
+    loadProducts
   };
 };

@@ -18,10 +18,14 @@ import io.jsonwebtoken.JwtException;
 import java.io.IOException;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private static final Logger log = LoggerFactory.getLogger(JwtFilter.class);
 
     public JwtFilter(JwtService jwtService) {
         this.jwtService = jwtService;
@@ -35,7 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        // 1. Si no hay token → seguir normal
+        // 1. Si no hay token -> seguir normal
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -62,9 +66,9 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
         } catch (ExpiredJwtException e) {
-            // 🔐 token expirado → no autenticamos
+            log.warn("Token expirado para request {}: {}", request.getRequestURI(), e.getMessage());
         } catch (JwtException e) {
-            // 🔐 token inválido → no autenticamos
+            log.warn("Token inválido para request {}: {}", request.getRequestURI(), e.getMessage());
         }
 
         filterChain.doFilter(request, response);

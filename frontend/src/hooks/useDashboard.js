@@ -11,12 +11,12 @@ export const useDashboard = () => {
     const load = async () => {
       try {
         const [ordersData, productsData] = await Promise.all([
-          orderService.getAll(),
-          productService.getAll()
-        ]);
+        orderService.getAll(0, 1000),   
+        productService.getAll(0, 1000)
+      ]);
 
-        setOrders(ordersData);
-        setProducts(productsData);
+        setOrders(ordersData.content);     
+        setProducts(productsData.content);
       } catch (err) {
         console.error("Error cargando dashboard", err);
       } finally {
@@ -27,7 +27,6 @@ export const useDashboard = () => {
     load();
   }, []);
 
-  // 🔥 lógica movida acá
   const productCount = {};
   orders.forEach(order => {
     order.products.forEach(name => {

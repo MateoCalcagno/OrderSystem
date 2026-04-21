@@ -1,11 +1,11 @@
 package ordersystem.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-
-import java.util.List;
 
 import ordersystem.service.ProductService;
 import ordersystem.dto.ProductResponseDTO;
@@ -22,8 +22,11 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductResponseDTO> getAll() {
-        return service.getAll();
+    public Page<ProductResponseDTO> getAll(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        return service.getAll(PageRequest.of(page, size));
     }
 
     @PostMapping

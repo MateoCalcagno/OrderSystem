@@ -11,7 +11,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -41,15 +43,17 @@ class OrderControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void getAll_comoUser_deberiaRetornar200() throws Exception {
-        when(orderService.getAll()).thenReturn(List.of(
+        Page<OrderResponseDTO> page = new PageImpl<>(List.of(
             new OrderResponseDTO(1L, List.of("Pizza"), "mateo", LocalDateTime.now(), new BigDecimal("10.00"))
         ));
 
+        when(orderService.getAll(any())).thenReturn(page);
+
         mockMvc.perform(get("/orders"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(1))
-            .andExpect(jsonPath("$[0].username").value("mateo"))
-            .andExpect(jsonPath("$.totalPrice").value(10.00));
+            .andExpect(jsonPath("$.content.length()").value(1))       
+            .andExpect(jsonPath("$.content[0].username").value("mateo"))
+            .andExpect(jsonPath("$.content[0].totalPrice").value(10.00)); 
     }
 
     @Test

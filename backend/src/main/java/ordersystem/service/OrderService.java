@@ -6,6 +6,8 @@ import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import ordersystem.repository.*;
 import ordersystem.model.*;
@@ -33,27 +35,18 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResponseDTO> getAll() {
-        // 1. Obtener el nombre del usuario logueado
+    public Page<OrderResponseDTO> getAll(Pageable pageable) {
         String currentUsername = authService.getCurrentUsername();
-        
-        // 2. Buscar al usuario para conocer su rol
         User user = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
-        List<Order> orders;
-
-        // 3. Lógica de visibilidad
         if (user.getRole() == Role.ADMIN) {
-            orders = orderRepository.findAllWithProducts();
+            return orderRepository.findAllWithProducts(pageable)
+                    .map(OrderMapper::toDTO);
         } else {
-            orders = orderRepository.findByUserUsernameWithProducts(currentUsername);
+            return orderRepository.findByUserUsernameWithProducts(currentUsername, pageable)
+                    .map(OrderMapper::toDTO);
         }
-
-        // 4. Mapeo a DTO
-        return orders.stream()
-            .map(OrderMapper::toDTO)
-            .toList();
     }
 
     @Transactional

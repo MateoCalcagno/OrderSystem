@@ -40,7 +40,7 @@ function Dashboard() {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData}>
             <XAxis dataKey="name" stroke="#ccc" />
-            <YAxis stroke="#ccc" />
+            <YAxis stroke="#ccc" allowDecimals={false} />
             <Tooltip />
             <Bar dataKey="count" fill="#a855f7" radius={[6, 6, 0, 0]} />
           </BarChart>

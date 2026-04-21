@@ -1,7 +1,8 @@
 import api from "./api";
 import request from "./request";
 
-const getAll = () => request(api.get("/products"));
+const getAll = (page = 0, size = 4) =>
+  request(api.get("/products", { params: { page, size } }));
 
 const create = (name, price) =>
   request(api.post("/products", { name, price }));
