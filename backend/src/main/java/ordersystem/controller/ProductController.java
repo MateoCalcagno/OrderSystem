@@ -24,9 +24,10 @@ public class ProductController {
     @GetMapping
     public Page<ProductResponseDTO> getAll(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "") String search
     ) {
-        return service.getAll(PageRequest.of(page, size));
+        return service.getAll(PageRequest.of(page, size), search);
     }
 
     @PostMapping

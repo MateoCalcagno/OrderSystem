@@ -21,9 +21,11 @@ public class ProductService {
         this.repository = repository;
     }
 
-    public Page<ProductResponseDTO> getAll(Pageable pageable) {
-        return repository.findAll(pageable)
-            .map(ProductMapper::toDTO);
+    public Page<ProductResponseDTO> getAll(Pageable pageable, String search) {
+        if (search != null && !search.isBlank()) {
+            return repository.findByNameContaining(search, pageable).map(ProductMapper::toDTO);
+        }
+        return repository.findAll(pageable).map(ProductMapper::toDTO);
     }
 
     public ProductResponseDTO create(ProductRequestDTO dto) {

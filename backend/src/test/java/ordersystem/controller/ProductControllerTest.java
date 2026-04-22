@@ -48,7 +48,7 @@ class ProductControllerTest {
             new ProductResponseDTO(2L, "Sushi", new BigDecimal("15.00"))
         ));
 
-        when(productService.getAll(any())).thenReturn(page);
+        when(productService.getAll(any(), any())).thenReturn(page);
 
         mockMvc.perform(get("/products"))
             .andExpect(status().isOk())

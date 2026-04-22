@@ -46,7 +46,7 @@ class ProductServiceTest {
             new PageImpl<>(List.of(pizza, sushi))
         );
 
-        Page<ProductResponseDTO> result = productService.getAll(pageable);
+        Page<ProductResponseDTO> result = productService.getAll(pageable, ""); 
 
         assertEquals(2, result.getContent().size());
     }
