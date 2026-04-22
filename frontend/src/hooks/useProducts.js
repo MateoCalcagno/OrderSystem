@@ -7,10 +7,10 @@ export const useProducts = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  const loadProducts = async (page = 0) => {
+  const loadProducts = async (page = 0, search = "") => {
     try {
-      const data = await productService.getAll(page);
-      setProducts(data.content);       
+      const data = await productService.getAll(page, 4, search);
+      setProducts(data.content);
       setTotalPages(data.totalPages);
       setCurrentPage(data.number);
     } catch {

@@ -14,10 +14,6 @@ function Products() {
   const { user } = useAuth();
   const { addToCart } = useCart();
 
-  const filteredProducts = products.filter(p =>
-    p.name?.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
     <div className="bg-white/10 backdrop-blur-xl p-6 rounded-2xl border border-white/10 h-full flex flex-col shadow-lg">
       
@@ -26,11 +22,14 @@ function Products() {
       </h2>
 
       {/* 🔍 BUSCADOR */}
-      <input 
+      <input
         type="text"
         placeholder="Buscar producto..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          loadProducts(0, e.target.value); 
+        }}
         className="w-full p-3 rounded-xl bg-white/5 border border-white/20 text-white mb-6 outline-none focus:ring-2 focus:ring-purple-500 transition-all"
       />
 
@@ -68,7 +67,7 @@ function Products() {
       <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
           
-          {filteredProducts.map(p => (
+          {products.map(p => (
             <div
               key={p.id}
               className="bg-white/5 p-4 rounded-xl border border-white/5 flex justify-between items-center hover:bg-white/10 transition-all group"
