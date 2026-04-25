@@ -40,6 +40,8 @@ class UserControllerTest {
     @MockBean
     private JwtService jwtService;
 
+    // ── REGISTER ─────────────────────────────
+
     @Test
     void register_conDatosValidos_deberiaRetornar204() throws Exception {
         RegisterDTO dto = new RegisterDTO();
@@ -59,6 +61,8 @@ class UserControllerTest {
             .andExpect(status().isNoContent());
     }
 
+    // ── LOGIN ─────────────────────────────
+
     @Test
     void login_conCredencialesValidas_deberiaRetornarToken() throws Exception {
         LoginDTO dto = new LoginDTO();
@@ -77,6 +81,8 @@ class UserControllerTest {
             .andExpect(jsonPath("$.token").value("fake-token"))
             .andExpect(jsonPath("$.username").value("mateo"));
     }
+
+    // ── GET ALL ─────────────────────────────
 
     @Test
     @WithMockUser(roles = "ADMIN")

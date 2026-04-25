@@ -23,8 +23,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
 
-    @Mock
-    private ProductRepository repository;
+    @Mock private ProductRepository repository;
 
     @InjectMocks
     private ProductService productService;

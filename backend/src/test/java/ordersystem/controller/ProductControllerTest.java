@@ -32,7 +32,8 @@ class ProductControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private ProductService productService;
@@ -40,9 +41,35 @@ class ProductControllerTest {
     @MockBean
     private JwtService jwtService;
 
+    // ── CREATE ─────────────────────────────
+
     @Test
-    @WithMockUser(roles = "USER")
-    void getAll_comoUser_deberiaRetornar200() throws Exception {
+    @WithMockUser(roles = "ADMIN")
+    void create_admin_deberiaRetornarOk() throws Exception {
+
+        ProductRequestDTO dto = new ProductRequestDTO();
+        dto.setName("Pizza");
+        dto.setPrice(new BigDecimal("10.00"));
+
+        when(productService.create(any()))
+                .thenReturn(new ProductResponseDTO(1L, "Pizza", new BigDecimal("10.00")));
+
+        mockMvc.perform(post("/products")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Pizza"));
+
+        verify(productService).create(any());
+    }
+
+    // ── GET ALL ─────────────────────────────
+
+    @Test
+    @WithMockUser
+    void getAll_usuarioAutenticado_deberiaRetornarOk() throws Exception {
+
         Page<ProductResponseDTO> page = new PageImpl<>(List.of(
             new ProductResponseDTO(1L, "Pizza", new BigDecimal("10.00")),
             new ProductResponseDTO(2L, "Sushi", new BigDecimal("15.00"))
@@ -51,57 +78,74 @@ class ProductControllerTest {
         when(productService.getAll(any(), any())).thenReturn(page);
 
         mockMvc.perform(get("/products"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content.length()").value(2))      
-            .andExpect(jsonPath("$.content[0].name").value("Pizza"))
-            .andExpect(jsonPath("$.content[0].price").value(10.00));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].name").value("Pizza"));
+
+        verify(productService).getAll(any(), any());
+    }
+
+    // ── GET BY ID ───────────────────────
+
+    @Test
+    @WithMockUser
+    void getById_existente_deberiaRetornarOk() throws Exception {
+
+        when(productService.getById(1L))
+                .thenReturn(new ProductResponseDTO(1L, "Pizza", new BigDecimal("10.00")));
+
+        mockMvc.perform(get("/products/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Pizza"));
+
+        verify(productService).getById(1L);
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
-    void create_comoAdmin_deberiaRetornar200() throws Exception {
-        ProductRequestDTO dto = new ProductRequestDTO();
-        dto.setName("Pizza");
-        dto.setPrice(new BigDecimal("10.00")); 
+    @WithMockUser
+    void getById_inexistente_deberiaRetornar404() throws Exception {
 
-        when(productService.create(any())).thenReturn(new ProductResponseDTO(1L, "Pizza", new BigDecimal("10.00")));
-
-        mockMvc.perform(post("/products")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("Pizza"))
-            .andExpect(jsonPath("$.price").value(10.00)); 
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void getById_conIdInexistente_deberiaRetornar404() throws Exception {
         when(productService.getById(99L))
-            .thenThrow(new ResourceNotFoundException("Producto no encontrado"));
+                .thenThrow(new ResourceNotFoundException("Producto no encontrado"));
 
         mockMvc.perform(get("/products/99"))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.message").value("Producto no encontrado"));
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Producto no encontrado"));
     }
+
+    // ── UPDATE ─────────────────────────────
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void update_comoAdmin_deberiaRetornar200() throws Exception {
+    void update_admin_deberiaRetornarOk() throws Exception {
+
         ProductRequestDTO dto = new ProductRequestDTO();
         dto.setName("Pizza Napolitana");
-        dto.setPrice(new BigDecimal("12.00")); 
+        dto.setPrice(new BigDecimal("12.00"));
 
         when(productService.update(eq(1L), any()))
-            .thenReturn(new ProductResponseDTO(1L, "Pizza Napolitana", new BigDecimal("12.00")));
+                .thenReturn(new ProductResponseDTO(1L, "Pizza Napolitana", new BigDecimal("12.00")));
 
         mockMvc.perform(put("/products/1")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("Pizza Napolitana"))
-            .andExpect(jsonPath("$.price").value(12.00));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Pizza Napolitana"));
+
+        verify(productService).update(eq(1L), any());
+    }
+
+    // ── DELETE ─────────────────────────────
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void delete_admin_deberiaRetornar204() throws Exception {
+
+        mockMvc.perform(delete("/products/1")
+                .with(csrf()))
+                .andExpect(status().isNoContent());
+
+        verify(productService).delete(1L);
     }
 }

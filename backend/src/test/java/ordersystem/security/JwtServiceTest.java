@@ -21,24 +21,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class JwtFilterTest {
 
-    @Mock
-    private JwtService jwtService;
-
-    @Mock
-    private HttpServletRequest request;
-
-    @Mock
-    private HttpServletResponse response;
-
-    @Mock
-    private FilterChain filterChain;
+    @Mock private JwtService jwtService;
+    @Mock private HttpServletRequest request;
+    @Mock private HttpServletResponse response;
+    @Mock private FilterChain filterChain;
 
     @InjectMocks
     private JwtFilter jwtFilter;
 
     @BeforeEach
     void limpiarContexto() {
-        // Cada test arranca con el contexto de seguridad limpio
         SecurityContextHolder.clearContext();
     }
 
@@ -52,15 +44,20 @@ class JwtFilterTest {
     }
 
     @Test
-    void tokenValido_autentica() throws Exception {
+    void tokenValido_deberiaSetearAuthentication() throws Exception {
         when(request.getHeader("Authorization")).thenReturn("Bearer token");
         when(jwtService.extractUsername("token")).thenReturn("mateo");
         when(jwtService.extractRole("token")).thenReturn("USER");
 
         jwtFilter.doFilterInternal(request, response, filterChain);
 
+        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
         assertEquals("mateo",
             SecurityContextHolder.getContext().getAuthentication().getName());
+
+        verify(jwtService).extractUsername("token");
+        verify(jwtService).extractRole("token");
+        verify(filterChain).doFilter(request, response);
     }
 
     @Test
