@@ -79,6 +79,24 @@ class ProductServiceTest {
     }
 
     @Test
+    void getAll_conBusqueda_deberiaUsarFindByNameContaining() {
+        Product pizza = new Product("Pizza");
+        pizza.setPrice(new BigDecimal("10.00"));
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(repository.findByNameContaining("pizza", pageable))
+            .thenReturn(new PageImpl<>(List.of(pizza)));
+
+        Page<ProductResponseDTO> result = productService.getAll(pageable, "pizza");
+
+        assertEquals(1, result.getContent().size());
+        assertEquals("Pizza", result.getContent().get(0).getName());
+        verify(repository).findByNameContaining("pizza", pageable);
+        verify(repository, never()).findAll(pageable);
+    }
+
+    @Test
     void update_deberiaActualizarONoEncontrar() {
         Product product = new Product("Pizza");
         product.setId(1L);

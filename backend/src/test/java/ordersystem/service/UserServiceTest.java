@@ -78,6 +78,31 @@ class UserServiceTest {
     }
 
     @Test
+    void register_conEmailDuplicado_deberiaLanzarExcepcion() {
+        RegisterDTO dto = buildDTO();
+
+        when(repository.findByUsername("mateo")).thenReturn(Optional.empty());
+        when(repository.findByEmail("m@m.com"))
+            .thenReturn(Optional.of(new User()));
+
+        assertThrows(BadRequestException.class, () -> userService.register(dto));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void register_conDniDuplicado_deberiaLanzarExcepcion() {
+        RegisterDTO dto = buildDTO();
+
+        when(repository.findByUsername("mateo")).thenReturn(Optional.empty());
+        when(repository.findByEmail("m@m.com")).thenReturn(Optional.empty());
+        when(repository.findByDni("12345678"))
+            .thenReturn(Optional.of(new User()));
+
+        assertThrows(BadRequestException.class, () -> userService.register(dto));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
     void login_deberiaRetornarToken() {
         LoginDTO dto = new LoginDTO();
         dto.setUsername("mateo");
