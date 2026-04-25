@@ -21,6 +21,7 @@ import ordersystem.repository.OrderRepository;
 import ordersystem.repository.ProductRepository;
 import ordersystem.repository.UserRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,6 +60,7 @@ class OrderServiceTest {
         User user = new User("mateo", "pass", Role.USER, "m@m.com", "123", "Mateo", "Lopez");
         Product product = new Product("Pizza");
         product.setId(1L);
+        product.setPrice(new BigDecimal("10.00")); 
 
         OrderRequestDTO dto = new OrderRequestDTO();
         dto.setProductIds(List.of(1L));

@@ -20,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -88,6 +89,7 @@ class ProductOrderIntegrationTest {
         // 1. Admin crea producto
         ProductRequestDTO productDTO = new ProductRequestDTO();
         productDTO.setName("Pizza");
+        productDTO.setPrice(new BigDecimal("10.00"));
 
         MvcResult productResult = mockMvc.perform(post("/products")
                 .header("Authorization", "Bearer " + adminToken)
@@ -116,14 +118,14 @@ class ProductOrderIntegrationTest {
         mockMvc.perform(get("/orders")
                 .header("Authorization", "Bearer " + userToken))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(1))
-            .andExpect(jsonPath("$[0].username").value("user1"));
+            .andExpect(jsonPath("$.content.length()").value(1))
+            .andExpect(jsonPath("$.content[0].username").value("user1"));
 
         // 4. Admin ve todas las ordenes
         mockMvc.perform(get("/orders")
                 .header("Authorization", "Bearer " + adminToken))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(1));
+            .andExpect(jsonPath("$.content.length()").value(1));
     }
 
     @Test
