@@ -5,8 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 
 import ordersystem.dto.ProductRequestDTO;
 import ordersystem.dto.ProductResponseDTO;
@@ -14,14 +13,11 @@ import ordersystem.exception.ResourceNotFoundException;
 import ordersystem.model.Product;
 import ordersystem.repository.ProductRepository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,93 +29,125 @@ class ProductServiceTest {
     @InjectMocks
     private ProductService productService;
 
+    // ── HELPERS ─────────────────────────────────────────
+
+    private Product product(String name) {
+        Product p = new Product(name);
+        p.setPrice(new BigDecimal("10.00"));
+        return p;
+    }
+
+    private Pageable pageable() {
+        return PageRequest.of(0, 10);
+    }
+
+    private ProductRequestDTO dto(String name) {
+        ProductRequestDTO dto = new ProductRequestDTO();
+        dto.setName(name);
+        return dto;
+    }
+
+    // ── GET ALL ─────────────────────────────────────────
+
     @Test
-    void getAll_deberiaRetornarPaginaDeProductos() {
-        Product pizza = new Product("Pizza");
-        pizza.setPrice(new BigDecimal("10.00"));
-        Product sushi = new Product("Sushi");
-        sushi.setPrice(new BigDecimal("15.00"));
+    void getAll_sinFiltro_deberiaUsarFindAll() {
+        when(repository.findAll(pageable()))
+            .thenReturn(new PageImpl<>(List.of(product("Pizza"), product("Sushi"))));
 
-        Pageable pageable = PageRequest.of(0, 10);
-
-        when(repository.findAll(pageable)).thenReturn(
-            new PageImpl<>(List.of(pizza, sushi))
-        );
-
-        Page<ProductResponseDTO> result = productService.getAll(pageable, ""); 
+        Page<ProductResponseDTO> result = productService.getAll(pageable(), "");
 
         assertEquals(2, result.getContent().size());
+        verify(repository).findAll(pageable());
+        verify(repository, never()).findByNameContaining(any(), any());
     }
 
     @Test
-    void create_deberiaCapitalizarNombreYGuardar() {
-        ProductRequestDTO dto = new ProductRequestDTO();
-        dto.setName("pizza margarita");
+    void getAll_conFiltro_deberiaUsarFindByNameContaining() {
+        when(repository.findByNameContaining("pizza", pageable()))
+            .thenReturn(new PageImpl<>(List.of(product("Pizza"))));
 
+        Page<ProductResponseDTO> result = productService.getAll(pageable(), "pizza");
+
+        assertEquals(1, result.getContent().size());
+        assertEquals("Pizza", result.getContent().get(0).getName());
+
+        verify(repository).findByNameContaining("pizza", pageable());
+        verify(repository, never()).findAll(pageable());
+    }
+
+    // ── CREATE ─────────────────────────────────────────
+
+    @Test
+    void create_deberiaCapitalizarYGuardar() {
         Product saved = new Product("Pizza Margarita");
         saved.setId(1L);
 
         when(repository.save(any(Product.class))).thenReturn(saved);
 
-        ProductResponseDTO result = productService.create(dto);
+        ProductResponseDTO result = productService.create(dto("pizza margarita"));
 
         assertEquals("Pizza Margarita", result.getName());
     }
 
+    // ── GET BY ID ───────────────────────────────────────
+
     @Test
-    void getById_conIdExistente_eInexistente() {
-        Product product = new Product("Pizza");
+    void getById_existente() {
+        Product product = product("Pizza");
         product.setId(1L);
 
         when(repository.findById(1L)).thenReturn(Optional.of(product));
+
         assertEquals("Pizza", productService.getById(1L).getName());
+    }
 
+    @Test
+    void getById_noExistente() {
         when(repository.findById(99L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> productService.getById(99L));
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> productService.getById(99L));
     }
 
-    @Test
-    void getAll_conBusqueda_deberiaUsarFindByNameContaining() {
-        Product pizza = new Product("Pizza");
-        pizza.setPrice(new BigDecimal("10.00"));
-
-        Pageable pageable = PageRequest.of(0, 10);
-
-        when(repository.findByNameContaining("pizza", pageable))
-            .thenReturn(new PageImpl<>(List.of(pizza)));
-
-        Page<ProductResponseDTO> result = productService.getAll(pageable, "pizza");
-
-        assertEquals(1, result.getContent().size());
-        assertEquals("Pizza", result.getContent().get(0).getName());
-        verify(repository).findByNameContaining("pizza", pageable);
-        verify(repository, never()).findAll(pageable);
-    }
+    // ── UPDATE ─────────────────────────────────────────
 
     @Test
-    void update_deberiaActualizarONoEncontrar() {
-        Product product = new Product("Pizza");
+    void update_existente() {
+        Product product = product("Pizza");
         product.setId(1L);
-
-        ProductRequestDTO dto = new ProductRequestDTO();
-        dto.setName("pizza napolitana");
 
         when(repository.findById(1L)).thenReturn(Optional.of(product));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        assertEquals("Pizza Napolitana", productService.update(1L, dto).getName());
+        ProductResponseDTO result = productService.update(1L, dto("pizza napolitana"));
 
-        when(repository.findById(99L)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> productService.update(99L, dto));
+        assertEquals("Pizza Napolitana", result.getName());
     }
 
     @Test
-    void delete_deberiaBorrarONoEncontrar() {
-        when(repository.existsById(1L)).thenReturn(true);
-        productService.delete(1L);
-        verify(repository).deleteById(1L);
+    void update_noExistente() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
 
+        assertThrows(ResourceNotFoundException.class,
+                () -> productService.update(99L, dto("pizza")));
+    }
+
+    // ── DELETE ─────────────────────────────────────────
+
+    @Test
+    void delete_existente() {
+        when(repository.existsById(1L)).thenReturn(true);
+
+        productService.delete(1L);
+
+        verify(repository).deleteById(1L);
+    }
+
+    @Test
+    void delete_noExistente() {
         when(repository.existsById(99L)).thenReturn(false);
-        assertThrows(ResourceNotFoundException.class, () -> productService.delete(99L));
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> productService.delete(99L));
     }
 }
