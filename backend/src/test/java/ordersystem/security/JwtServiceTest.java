@@ -1,5 +1,6 @@
 package ordersystem.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -65,6 +66,18 @@ class JwtFilterTest {
         when(request.getHeader("Authorization")).thenReturn("Bearer token");
         when(jwtService.extractUsername("token"))
             .thenThrow(new JwtException("token inválido"));
+
+        jwtFilter.doFilterInternal(request, response, filterChain);
+
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    void tokenExpirado_noAutentica() throws Exception {
+        when(request.getHeader("Authorization")).thenReturn("Bearer token");
+        when(jwtService.extractUsername("token"))
+            .thenThrow(new ExpiredJwtException(null, null, "expirado"));
 
         jwtFilter.doFilterInternal(request, response, filterChain);
 

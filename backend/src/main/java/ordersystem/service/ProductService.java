@@ -8,6 +8,7 @@ import ordersystem.dto.ProductResponseDTO;
 import ordersystem.exception.ResourceNotFoundException;
 import ordersystem.mapper.ProductMapper;
 import ordersystem.model.Product;
+import ordersystem.util.StringUtils;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +31,7 @@ public class ProductService {
 
     public ProductResponseDTO create(ProductRequestDTO dto) {
         Product product = ProductMapper.toEntity(dto);
-        product.setName(capitalize(product.getName()));
+        product.setName(StringUtils.capitalize(product.getName()));
 
         return ProductMapper.toDTO(repository.save(product));
     }
@@ -46,7 +47,7 @@ public class ProductService {
         Product product = repository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
 
-        product.setName(capitalize(dto.getName()));
+        product.setName(StringUtils.capitalize(dto.getName()));
         product.setPrice(dto.getPrice()); 
 
         return ProductMapper.toDTO(repository.save(product));
@@ -57,22 +58,5 @@ public class ProductService {
             throw new ResourceNotFoundException("Producto no encontrado");
         }
         repository.deleteById(id);
-    }
-
-    public String capitalize(String text) {
-        if (text == null || text.isEmpty()) return text;
-
-        String[] words = text.toLowerCase().split(" ");
-        StringBuilder result = new StringBuilder();
-
-        for (String word : words) {
-            if (!word.isEmpty()) {
-                result.append(Character.toUpperCase(word.charAt(0)))
-                    .append(word.substring(1))
-                    .append(" ");
-            }
-        }
-
-        return result.toString().trim();
     }
 }

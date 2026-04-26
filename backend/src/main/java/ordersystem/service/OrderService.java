@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import ordersystem.repository.*;
+import ordersystem.util.PriceCalculator;
 import ordersystem.model.*;
 import ordersystem.dto.OrderResponseDTO;
 import ordersystem.dto.OrderRequestDTO;
@@ -60,9 +61,7 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id)))
             .toList();
 
-        BigDecimal total = products.stream()
-            .map(Product::getPrice)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal total = PriceCalculator.calculateTotal(products);
 
         Order order = new Order();
         order.setProducts(products);
