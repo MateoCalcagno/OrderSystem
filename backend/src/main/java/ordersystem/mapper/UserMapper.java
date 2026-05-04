@@ -10,7 +10,7 @@ public class UserMapper {
     public static UserResponseDTO toDTO(User user) {
         return new UserResponseDTO(
             user.getUsername(),
-            user.getRole()
+            user.getRole().name()
         );
     }
 

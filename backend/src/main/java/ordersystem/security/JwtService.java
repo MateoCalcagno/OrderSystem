@@ -15,6 +15,9 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
 
+    @Value("${jwt.expiration-ms}")
+    private long expirationMs;
+
     private Key getSigningKey() {
         // Genera la clave a partir del String del properties
         return Keys.hmacShaKeyFor(secret.getBytes());
@@ -25,7 +28,7 @@ public class JwtService {
                 .setSubject(username)
                 .claim("role", role)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

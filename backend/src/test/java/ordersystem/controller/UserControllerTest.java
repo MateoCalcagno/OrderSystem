@@ -88,8 +88,8 @@ class UserControllerTest {
     @WithMockUser(roles = "ADMIN")
     void getAll_comoAdmin_deberiaRetornar200() throws Exception {
         when(userService.getAll()).thenReturn(List.of(
-            new UserResponseDTO("mateo", Role.USER),
-            new UserResponseDTO("admin", Role.ADMIN)
+            new UserResponseDTO("mateo", Role.USER.name()),
+            new UserResponseDTO("admin", Role.ADMIN.name())
         ));
 
         mockMvc.perform(get("/users"))

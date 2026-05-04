@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -119,7 +120,10 @@ class UserServiceTest {
 
     @Test
     void getAll_deberiaRetornarLista() {
-        when(repository.findAll()).thenReturn(List.of(new User(), new User()));
+        User u1 = new User("mateo", "pass", Role.USER, "m@m.com", "123", "Mateo", "Calcagno");
+        User u2 = new User("admin", "pass", Role.ADMIN, "a@a.com", "456", "Admin", "Admin");
+
+        when(repository.findAll()).thenReturn(List.of(u1, u2));
 
         assertEquals(2, userService.getAll().size());
     }

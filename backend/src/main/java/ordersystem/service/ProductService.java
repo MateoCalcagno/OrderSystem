@@ -2,6 +2,7 @@ package ordersystem.service;
 
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import ordersystem.repository.ProductRepository;
 import ordersystem.dto.ProductRequestDTO;
 import ordersystem.dto.ProductResponseDTO;
@@ -22,6 +23,7 @@ public class ProductService {
         this.repository = repository;
     }
 
+    @Transactional(readOnly = true)
     public Page<ProductResponseDTO> getAll(Pageable pageable, String search) {
         if (search != null && !search.isBlank()) {
             return repository.findByNameContaining(search, pageable).map(ProductMapper::toDTO);
@@ -29,6 +31,7 @@ public class ProductService {
         return repository.findAll(pageable).map(ProductMapper::toDTO);
     }
 
+    @Transactional
     public ProductResponseDTO create(ProductRequestDTO dto) {
         Product product = ProductMapper.toEntity(dto);
         product.setName(StringUtils.capitalize(product.getName()));
@@ -36,6 +39,7 @@ public class ProductService {
         return ProductMapper.toDTO(repository.save(product));
     }
 
+    @Transactional(readOnly = true)
     public ProductResponseDTO getById(Long id) {
         Product product = repository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
@@ -43,6 +47,7 @@ public class ProductService {
         return ProductMapper.toDTO(product);
     }
 
+    @Transactional
     public ProductResponseDTO update(Long id, ProductRequestDTO dto) {
         Product product = repository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
@@ -53,6 +58,7 @@ public class ProductService {
         return ProductMapper.toDTO(repository.save(product));
     }
 
+    @Transactional
     public void delete(Long id) {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Producto no encontrado");
