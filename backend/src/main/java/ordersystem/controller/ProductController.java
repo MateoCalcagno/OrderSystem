@@ -31,6 +31,7 @@ public class ProductController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ProductResponseDTO create(@RequestBody @Valid ProductRequestDTO dto) {
         return service.create(dto);
     }

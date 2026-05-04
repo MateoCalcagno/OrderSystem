@@ -22,7 +22,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.CREATED)
     public void register(@RequestBody @Valid RegisterDTO dto) {
         service.register(dto);
     }
