@@ -58,7 +58,7 @@ class UserControllerTest {
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isCreated());
     }
 
     // ── LOGIN ─────────────────────────────

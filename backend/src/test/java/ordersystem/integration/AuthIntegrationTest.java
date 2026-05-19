@@ -42,7 +42,7 @@ class AuthIntegrationTest {
         mockMvc.perform(post("/users/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(buildRegisterDTO())))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isCreated());
 
         // 2. Login
         LoginDTO loginDTO = new LoginDTO();

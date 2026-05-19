@@ -1,5 +1,6 @@
 package ordersystem.service;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,6 +10,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import ordersystem.dto.OrderRequestDTO;
 import ordersystem.dto.OrderResponseDTO;
@@ -56,16 +61,35 @@ class OrderServiceTest {
         return PageRequest.of(0, 10);
     }
 
+    private void mockUsername(String username) {
+        when(authService.getCurrentUsername()).thenReturn(username);
+    }
+
     private void mockUser(User user) {
         when(authService.getCurrentUsername()).thenReturn(user.getUsername());
         when(userRepository.findByUsername(user.getUsername()))
                 .thenReturn(Optional.of(user));
     }
 
+    private void mockSecurityContext(Role role) {
+        Authentication auth = mock(Authentication.class);
+        when(auth.getAuthorities()).thenAnswer(inv ->
+            List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))
+        );
+        SecurityContext ctx = mock(SecurityContext.class);
+        when(ctx.getAuthentication()).thenReturn(auth);
+        SecurityContextHolder.setContext(ctx);
+    }
+
     private Order buildOrder(User user) {
         Order order = new Order(List.of(new Product("Pizza")));
         order.setUser(user);
         return order;
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
     }
 
     // ── CREATE ───────────────────────────────────────────
@@ -137,7 +161,8 @@ class OrderServiceTest {
         Order order = buildOrder(owner);
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        mockUser(owner);
+        mockUsername("mateo");
+        mockSecurityContext(Role.USER);
 
         orderService.delete(1L);
 
@@ -146,12 +171,12 @@ class OrderServiceTest {
 
     @Test
     void delete_admin() {
-        User admin = user("admin", Role.ADMIN);
         User owner = user("mateo", Role.USER);
         Order order = buildOrder(owner);
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        mockUser(admin);
+        mockUsername("admin");
+        mockSecurityContext(Role.ADMIN);
 
         orderService.delete(1L);
 
@@ -164,7 +189,8 @@ class OrderServiceTest {
         Order order = buildOrder(owner);
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        mockUser(user("otro", Role.USER));
+        mockUsername("otro");
+        mockSecurityContext(Role.USER);
 
         assertThrows(AccessDeniedException.class,
                 () -> orderService.delete(1L));

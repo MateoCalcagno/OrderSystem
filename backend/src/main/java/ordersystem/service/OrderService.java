@@ -3,6 +3,7 @@ package ordersystem.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -79,12 +80,15 @@ public class OrderService {
 
         // 2. Obtener usuario actual
         String currentUsername = authService.getCurrentUsername();
-        User currentUser = userRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario autenticado no encontrado"));
 
         // 3. Validación de permisos
         boolean isOwner = order.getUser().getUsername().equals(currentUsername);
-        boolean isAdmin = currentUser.getRole() == Role.ADMIN;
+        boolean isAdmin = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
 
         if (isOwner || isAdmin) {
             orderRepository.delete(order);

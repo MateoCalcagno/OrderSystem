@@ -64,7 +64,7 @@ class OrderControllerTest {
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.products.length()").value(2))
                 .andExpect(jsonPath("$.totalPrice").value(25.00));
 
