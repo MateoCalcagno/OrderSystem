@@ -144,12 +144,13 @@ El proyecto incluye diferentes niveles de testing:
 
 ## 📚 Aprendizajes
 
-- Implementación de autenticación segura con JWT
-- Manejo de roles y autorización en backend
-- Testing en múltiples capas (unit, controller, integration)
-- Comunicación frontend-backend mediante APIs REST
-- Manejo de estado global en React
-- Deploy de aplicaciones fullstack (Vercel + Render)
+- Diseño e implementación de APIs REST con Spring Boot
+- Autenticación y autorización con JWT y manejo de roles (USER/ADMIN)
+- Arquitectura en capas (controller, service, repository) con buenas prácticas (DTOs, mappers, utils)
+- Testing en múltiples capas: unitarios, controllers y tests de integración
+- Documentación y prueba de endpoints con Postman
+- Consumo de APIs REST desde React 
+- Deploy fullstack con Vercel (frontend) y Render (backend)
 
 ---
 
