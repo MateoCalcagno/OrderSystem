@@ -75,25 +75,22 @@ public class OrderService {
     @Transactional
     public void delete(Long id) {
         // 1. Buscar la orden
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Orden no encontrada con id: " + id));
+        String ownerUsername = orderRepository.findOwnerUsernameById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Orden no encontrada con id: " + id));
 
         // 2. Obtener usuario actual
         String currentUsername = authService.getCurrentUsername();
 
         // 3. Validación de permisos
-        boolean isOwner = order.getUser().getUsername().equals(currentUsername);
         boolean isAdmin = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getAuthorities()
                 .stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-
-        if (isOwner || isAdmin) {
-            orderRepository.delete(order);
-        } else {
+        if (!ownerUsername.equals(currentUsername) && !isAdmin)
             throw new AccessDeniedException("No tenés permiso para borrar esta orden");
-        }
+
+        orderRepository.deleteById(id);
     }
 }

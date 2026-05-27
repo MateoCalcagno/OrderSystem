@@ -36,17 +36,12 @@ public class UserService {
 
     public void register(RegisterDTO dto) {
         // 1. Validar si el usuario ya existe
-        if (repository.findByUsername(dto.getUsername()).isPresent()) {
+        if (repository.existsByUsername(dto.getUsername()))
             throw new BadRequestException("El nombre de usuario ya está registrado");
-        }
-
-        if (repository.findByEmail(dto.getEmail()).isPresent()) {
+        if (repository.existsByEmail(dto.getEmail()))
             throw new BadRequestException("El email ya está registrado");
-        }
-
-        if (repository.findByDni(dto.getDni()).isPresent()) {
+        if (repository.existsByDni(dto.getDni()))
             throw new BadRequestException("El DNI ya está registrado");
-        }
 
         // 2. Crear la ENTIDAD a partir del DTO
         User user = UserMapper.toEntity(dto, passwordEncoder.encode(dto.getPassword()));

@@ -47,9 +47,9 @@ class UserServiceTest {
     }
 
     private void noDuplicates() {
-        when(repository.findByUsername("mateo")).thenReturn(Optional.empty());
-        when(repository.findByEmail("m@m.com")).thenReturn(Optional.empty());
-        when(repository.findByDni("12345678")).thenReturn(Optional.empty());
+        when(repository.existsByUsername("mateo")).thenReturn(false);
+        when(repository.existsByEmail("m@m.com")).thenReturn(false);
+        when(repository.existsByDni("12345678")).thenReturn(false);
     }
 
     // ── REGISTER ───────────────────────────────────────
@@ -67,8 +67,7 @@ class UserServiceTest {
 
     @Test
     void register_usernameDuplicado_deberiaFallar() {
-        when(repository.findByUsername("mateo"))
-                .thenReturn(Optional.of(new User()));
+        when(repository.existsByUsername("mateo")).thenReturn(true);
 
         assertThrows(BadRequestException.class, () -> userService.register(dto()));
         verify(repository, never()).save(any());
@@ -76,9 +75,8 @@ class UserServiceTest {
 
     @Test
     void register_emailDuplicado_deberiaFallar() {
-        when(repository.findByUsername("mateo")).thenReturn(Optional.empty());
-        when(repository.findByEmail("m@m.com"))
-                .thenReturn(Optional.of(new User()));
+        when(repository.existsByUsername("mateo")).thenReturn(false);
+        when(repository.existsByEmail("m@m.com")).thenReturn(true);
 
         assertThrows(BadRequestException.class, () -> userService.register(dto()));
         verify(repository, never()).save(any());
@@ -86,10 +84,9 @@ class UserServiceTest {
 
     @Test
     void register_dniDuplicado_deberiaFallar() {
-        when(repository.findByUsername("mateo")).thenReturn(Optional.empty());
-        when(repository.findByEmail("m@m.com")).thenReturn(Optional.empty());
-        when(repository.findByDni("12345678"))
-                .thenReturn(Optional.of(new User()));
+        when(repository.existsByUsername("mateo")).thenReturn(false);
+        when(repository.existsByEmail("m@m.com")).thenReturn(false);
+        when(repository.existsByDni("12345678")).thenReturn(true);
 
         assertThrows(BadRequestException.class, () -> userService.register(dto()));
         verify(repository, never()).save(any());

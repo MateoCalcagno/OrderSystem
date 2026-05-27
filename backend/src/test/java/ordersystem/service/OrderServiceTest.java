@@ -157,38 +157,29 @@ class OrderServiceTest {
 
     @Test
     void delete_owner() {
-        User owner = user("mateo", Role.USER);
-        Order order = buildOrder(owner);
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findOwnerUsernameById(1L)).thenReturn(Optional.of("mateo"));
         mockUsername("mateo");
         mockSecurityContext(Role.USER);
 
         orderService.delete(1L);
 
-        verify(orderRepository).delete(order);
+        verify(orderRepository).deleteById(1L);
     }
 
     @Test
     void delete_admin() {
-        User owner = user("mateo", Role.USER);
-        Order order = buildOrder(owner);
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findOwnerUsernameById(1L)).thenReturn(Optional.of("mateo"));
         mockUsername("admin");
         mockSecurityContext(Role.ADMIN);
 
         orderService.delete(1L);
 
-        verify(orderRepository).delete(order);
+        verify(orderRepository).deleteById(1L);
     }
 
     @Test
     void delete_forbidden() {
-        User owner = user("mateo", Role.USER);
-        Order order = buildOrder(owner);
-
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.findOwnerUsernameById(1L)).thenReturn(Optional.of("mateo"));
         mockUsername("otro");
         mockSecurityContext(Role.USER);
 
