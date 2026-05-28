@@ -1,20 +1,28 @@
 package ordersystem.mapper;
 
 import ordersystem.model.Order;
-import ordersystem.model.Product;
 import ordersystem.dto.OrderResponseDTO;
+import ordersystem.dto.OrderItemResponseDTO;
+
+import java.util.List;
 
 public class OrderMapper {
 
     public static OrderResponseDTO toDTO(Order order) {
+        List<OrderItemResponseDTO> items = order.getItems().stream()
+            .map(item -> new OrderItemResponseDTO(
+                item.getProduct().getName(),
+                item.getQuantity(),
+                item.getUnitPrice()
+            ))
+            .toList();
+
         return new OrderResponseDTO(
             order.getId(),
-            order.getProducts().stream()
-                .map(Product::getName)
-                .toList(),
+            items,
             order.getUser().getUsername(),
             order.getCreatedAt(),
-            order.getTotalPrice() 
+            order.getTotalPrice()  
         );
     }
 }

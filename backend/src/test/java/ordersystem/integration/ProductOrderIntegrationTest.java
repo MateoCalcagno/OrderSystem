@@ -2,6 +2,7 @@ package ordersystem.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ordersystem.dto.LoginDTO;
+import ordersystem.dto.OrderItemRequestDTO;
 import ordersystem.dto.OrderRequestDTO;
 import ordersystem.dto.ProductRequestDTO;
 import ordersystem.model.Role;
@@ -23,6 +24,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -80,7 +82,7 @@ class ProductOrderIntegrationTest {
             .get("token").asText();
     }
 
-    @Test
+   @Test
     void adminCreaProducto_userHaceOrden_yLaVe() throws Exception {
 
         String adminToken = getToken("admin", "admin123");
@@ -99,29 +101,43 @@ class ProductOrderIntegrationTest {
             .andExpect(jsonPath("$.name").value("Pizza"))
             .andReturn();
 
-        Long productId = objectMapper.readTree(productResult.getResponse().getContentAsString())
-            .get("id").asLong();
+        Long productId = objectMapper.readTree(
+                productResult.getResponse().getContentAsString()
+        ).get("id").asLong();
 
-        // 2. User crea orden con ese producto
+        // 2. User crea orden 
+        OrderItemRequestDTO item = new OrderItemRequestDTO();
+        item.setProductId(productId);
+        item.setQuantity(2);
+
         OrderRequestDTO orderDTO = new OrderRequestDTO();
-        orderDTO.setProductIds(List.of(productId));
+        orderDTO.setItems(List.of(item));
 
-        mockMvc.perform(post("/orders")
+        MvcResult orderResult = mockMvc.perform(post("/orders")
                 .header("Authorization", "Bearer " + userToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(orderDTO)))
             .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.products[0]").value("Pizza"))
-            .andExpect(jsonPath("$.username").value("user1"));
+            .andExpect(jsonPath("$.items[0].productName").value("Pizza"))
+            .andExpect(jsonPath("$.items[0].quantity").value(2))
+            .andExpect(jsonPath("$.username").value("user1"))
+            .andReturn();
 
-        // 3. User ve su orden
+        BigDecimal total = new BigDecimal(
+                objectMapper.readTree(orderResult.getResponse().getContentAsString())
+                        .get("totalPrice").asText()
+        );
+
+        assertEquals(0, new BigDecimal("20.00").compareTo(total));
+
+        // 3. User ve su orden 
         mockMvc.perform(get("/orders")
                 .header("Authorization", "Bearer " + userToken))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content.length()").value(1))
             .andExpect(jsonPath("$.content[0].username").value("user1"));
 
-        // 4. Admin ve todas las ordenes
+        // 4. Admin ve todas 
         mockMvc.perform(get("/orders")
                 .header("Authorization", "Bearer " + adminToken))
             .andExpect(status().isOk())
@@ -130,10 +146,12 @@ class ProductOrderIntegrationTest {
 
     @Test
     void userNoPuedaCrearProducto() throws Exception {
+
         String userToken = getToken("user1", "user123");
 
         ProductRequestDTO dto = new ProductRequestDTO();
         dto.setName("Sushi");
+        dto.setPrice(new BigDecimal("10.00"));
 
         mockMvc.perform(post("/products")
                 .header("Authorization", "Bearer " + userToken)

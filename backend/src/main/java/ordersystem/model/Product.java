@@ -17,18 +17,18 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    public Product() {} // Constructor vacío requerido por JPA
+    public Product() {}
 
     public Product(String name) {
         this.name = name;
     }
 
-    // Getters y setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

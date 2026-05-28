@@ -15,16 +15,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import ordersystem.dto.OrderRequestDTO;
-import ordersystem.dto.OrderResponseDTO;
+import ordersystem.dto.*;
 import ordersystem.exception.ResourceNotFoundException;
-import ordersystem.model.Order;
-import ordersystem.model.Product;
-import ordersystem.model.Role;
-import ordersystem.model.User;
-import ordersystem.repository.OrderRepository;
-import ordersystem.repository.ProductRepository;
-import ordersystem.repository.UserRepository;
+import ordersystem.model.*;
+import ordersystem.repository.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -45,24 +39,25 @@ class OrderServiceTest {
     @InjectMocks
     private OrderService orderService;
 
-    // ── HELPERS ───────────────────────────────────────────
+    // ───────────────────────── HELPERS ─────────────────────────
 
     private User user(String username, Role role) {
         return new User(username, "pass", role, "", "", "", "");
     }
 
-    private OrderRequestDTO orderRequest(Long... productIds) {
+    private OrderRequestDTO orderRequest(Long productId, int quantity) {
+        OrderItemRequestDTO item = new OrderItemRequestDTO();
+        item.setProductId(productId);
+        item.setQuantity(quantity);
+
         OrderRequestDTO dto = new OrderRequestDTO();
-        dto.setProductIds(List.of(productIds));
+        dto.setItems(List.of(item));
+
         return dto;
     }
 
     private Pageable pageable() {
         return PageRequest.of(0, 10);
-    }
-
-    private void mockUsername(String username) {
-        when(authService.getCurrentUsername()).thenReturn(username);
     }
 
     private void mockUser(User user) {
@@ -71,95 +66,112 @@ class OrderServiceTest {
                 .thenReturn(Optional.of(user));
     }
 
-    private void mockSecurityContext(Role role) {
+    private void mockUsername(String username) {
+        when(authService.getCurrentUsername()).thenReturn(username);
+    }
+
+    private void mockSecurity(Role role) {
         Authentication auth = mock(Authentication.class);
+
         when(auth.getAuthorities()).thenAnswer(inv ->
             List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))
         );
+
         SecurityContext ctx = mock(SecurityContext.class);
         when(ctx.getAuthentication()).thenReturn(auth);
+
         SecurityContextHolder.setContext(ctx);
     }
 
-    private Order buildOrder(User user) {
-        Order order = new Order(List.of(new Product("Pizza")));
-        order.setUser(user);
-        return order;
-    }
-
     @AfterEach
-    void clearSecurityContext() {
+    void clear() {
         SecurityContextHolder.clearContext();
     }
 
-    // ── CREATE ───────────────────────────────────────────
+    // ───────────────────────── CREATE ─────────────────────────
 
     @Test
     void create_ok() {
+
         User user = user("mateo", Role.USER);
+        mockUser(user);
 
         Product product = new Product("Pizza");
         product.setId(1L);
         product.setPrice(new BigDecimal("10.00"));
 
-        mockUser(user);
+        when(productRepository.findById(1L))
+                .thenReturn(Optional.of(product));
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(orderRepository.save(any(Order.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
-        OrderResponseDTO result = orderService.create(orderRequest(1L));
+        OrderResponseDTO result =
+                orderService.create(orderRequest(1L, 2));
 
-        assertEquals(1, result.getProducts().size());
+        assertEquals(1, result.getItems().size());
+        assertEquals(new BigDecimal("20.00"), result.getTotalPrice());
     }
 
     @Test
     void create_productoNoExiste() {
-        User user = user("mateo", Role.USER);
 
+        User user = user("mateo", Role.USER);
         mockUser(user);
 
-        when(productRepository.findById(99L)).thenReturn(Optional.empty());
+        when(productRepository.findById(99L))
+                .thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> orderService.create(orderRequest(99L)));
+                () -> orderService.create(orderRequest(99L, 1)));
     }
 
-    // ── GET ALL ─────────────────────────────────────────
+    // ───────────────────────── GET ALL ─────────────────────────
 
     @Test
     void getAll_admin() {
-        User admin = user("admin", Role.ADMIN);
-        Order order = buildOrder(admin);
 
+        User admin = user("admin", Role.ADMIN);
         mockUser(admin);
 
-        when(orderRepository.findAllWithProducts(pageable()))
+        Order order = new Order();
+        order.setUser(admin);
+
+        when(orderRepository.findAllWithItems(pageable()))
                 .thenReturn(new PageImpl<>(List.of(order)));
 
-        assertEquals(1, orderService.getAll(pageable()).getContent().size());
+        var result = orderService.getAll(pageable());
+
+        assertEquals(1, result.getContent().size());
     }
 
     @Test
     void getAll_user() {
-        User user = user("mateo", Role.USER);
-        Order order = buildOrder(user);
 
+        User user = user("mateo", Role.USER);
         mockUser(user);
 
-        when(orderRepository.findByUserUsernameWithProducts("mateo", pageable()))
+        Order order = new Order();
+        order.setUser(user);
+
+        when(orderRepository.findByUserUsernameWithItems("mateo", pageable()))
                 .thenReturn(new PageImpl<>(List.of(order)));
 
-        assertEquals(1, orderService.getAll(pageable()).getContent().size());
+        var result = orderService.getAll(pageable());
+
+        assertEquals(1, result.getContent().size());
     }
 
-    // ── DELETE ─────────────────────────────────────────
+    // ───────────────────────── DELETE ─────────────────────────
 
     @Test
     void delete_owner() {
-        when(orderRepository.findOwnerUsernameById(1L)).thenReturn(Optional.of("mateo"));
+
+        when(orderRepository.findOwnerUsernameById(1L))
+                .thenReturn(Optional.of("mateo"));
+
         mockUsername("mateo");
-        mockSecurityContext(Role.USER);
+        mockSecurity(Role.USER);
 
         orderService.delete(1L);
 
@@ -168,9 +180,12 @@ class OrderServiceTest {
 
     @Test
     void delete_admin() {
-        when(orderRepository.findOwnerUsernameById(1L)).thenReturn(Optional.of("mateo"));
+
+        when(orderRepository.findOwnerUsernameById(1L))
+                .thenReturn(Optional.of("mateo"));
+
         mockUsername("admin");
-        mockSecurityContext(Role.ADMIN);
+        mockSecurity(Role.ADMIN);
 
         orderService.delete(1L);
 
@@ -179,9 +194,12 @@ class OrderServiceTest {
 
     @Test
     void delete_forbidden() {
-        when(orderRepository.findOwnerUsernameById(1L)).thenReturn(Optional.of("mateo"));
+
+        when(orderRepository.findOwnerUsernameById(1L))
+                .thenReturn(Optional.of("mateo"));
+
         mockUsername("otro");
-        mockSecurityContext(Role.USER);
+        mockSecurity(Role.USER);
 
         assertThrows(AccessDeniedException.class,
                 () -> orderService.delete(1L));

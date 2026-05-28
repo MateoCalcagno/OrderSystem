@@ -16,16 +16,16 @@ function CartSidebar() {
     const loadId = toast.loading("Procesando tu pedido...");
 
     try {
-      const productIds = [];
-      cart.forEach(item => {
-        for (let i = 0; i < item.quantity; i++) productIds.push(item.id);
-      });
+      const items = cart.map(item => ({
+        productId: item.id,
+        quantity: item.quantity,
+      }));
 
-      await orderService.create(productIds);
-      
+      await orderService.create(items);
+
       clearCart();
       toast.success("¡Pedido confirmado! 🎉", { id: loadId });
-      
+
     } catch (err) {
       toast.error("Error al procesar el pedido ❌", { id: loadId });
     }
@@ -50,16 +50,15 @@ function CartSidebar() {
             <div key={item.id} className="bg-white/5 p-3 rounded-xl border border-white/5 flex flex-col gap-3 group animate-in zoom-in-95 duration-200">
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-white truncate w-36">{item.name}</span>
-                <button 
+                <button
                   onClick={() => {
                     removeFromCart(item.id);
                     toast.error(`${item.name} eliminado`, { duration: 1500 });
-                  }} 
+                  }}
                   className="text-red-400 hover:text-red-500 transition-colors"
                 >✕</button>
               </div>
 
-              {/* 💰 precio unitario x cantidad */}
               <div className="flex justify-between items-center px-1">
                 <span className="text-white/30 text-[10px]">${item.price?.toFixed(2)} c/u</span>
                 <span className="text-green-400 text-xs font-bold">
@@ -79,8 +78,6 @@ function CartSidebar() {
 
       {cart.length > 0 && (
         <div className="p-4 bg-white/5 border-t border-white/10">
-
-          {/* 💰 total */}
           <div className="flex justify-between items-center mb-3 px-1">
             <span className="text-white/40 text-xs uppercase tracking-widest">Total</span>
             <span className="text-white font-black text-lg">
@@ -88,8 +85,8 @@ function CartSidebar() {
             </span>
           </div>
 
-          <button 
-            onClick={handleCreateOrder} 
+          <button
+            onClick={handleCreateOrder}
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 py-4 rounded-xl font-black text-white text-xs uppercase tracking-widest shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
           >Confirmar Compra</button>
         </div>

@@ -1,6 +1,9 @@
 package ordersystem.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import ordersystem.dto.OrderItemRequestDTO;
+import ordersystem.dto.OrderItemResponseDTO;
 import ordersystem.dto.OrderRequestDTO;
 import ordersystem.dto.OrderResponseDTO;
 import ordersystem.security.JwtService;
@@ -45,18 +48,25 @@ class OrderControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
-    void create_requestValido_deberiaRetornarOk() throws Exception {
+    void create_requestValido_deberiaRetornarCreated() throws Exception {
 
         OrderRequestDTO dto = new OrderRequestDTO();
-        dto.setProductIds(List.of(1L, 2L));
+
+        OrderItemRequestDTO item = new OrderItemRequestDTO();
+        item.setProductId(1L);
+        item.setQuantity(2);
+
+        dto.setItems(List.of(item));
 
         when(orderService.create(any())).thenReturn(
             new OrderResponseDTO(
                 1L,
-                List.of("Pizza", "Sushi"),
+                List.of(
+                    new OrderItemResponseDTO("Pizza", 2, new BigDecimal("10.00"))
+                ),
                 "mateo",
                 LocalDateTime.now(),
-                new BigDecimal("25.00")
+                new BigDecimal("20.00")
             )
         );
 
@@ -65,8 +75,8 @@ class OrderControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.products.length()").value(2))
-                .andExpect(jsonPath("$.totalPrice").value(25.00));
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.totalPrice").value(20.00));
 
         verify(orderService).create(any());
     }
@@ -80,7 +90,9 @@ class OrderControllerTest {
         Page<OrderResponseDTO> page = new PageImpl<>(List.of(
             new OrderResponseDTO(
                 1L,
-                List.of("Pizza"),
+                List.of(
+                    new OrderItemResponseDTO("Pizza", 1, new BigDecimal("10.00"))
+                ),
                 "mateo",
                 LocalDateTime.now(),
                 new BigDecimal("10.00")

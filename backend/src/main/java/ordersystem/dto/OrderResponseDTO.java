@@ -7,22 +7,24 @@ import java.util.List;
 public class OrderResponseDTO {
 
     private Long id;
-    private List<String> products;
-    private String username; 
-    private LocalDateTime createdAt; 
-    private BigDecimal totalPrice; 
+    private List<OrderItemResponseDTO> items;
+    private String username;
+    private LocalDateTime createdAt;
+    private BigDecimal totalPrice;
 
-    public OrderResponseDTO(Long id, List<String> products, String username, LocalDateTime createdAt, BigDecimal totalPrice) {
+    public OrderResponseDTO(Long id, List<OrderItemResponseDTO> items,
+                            String username, LocalDateTime createdAt,
+                            BigDecimal totalPrice) {
         this.id = id;
-        this.products = products;
+        this.items = items;
         this.username = username;
         this.createdAt = createdAt;
-        this.totalPrice = totalPrice; 
+        this.totalPrice = totalPrice;
     }
 
     public Long getId() { return id; }
-    public List<String> getProducts() { return products; }
+    public List<OrderItemResponseDTO> getItems() { return items; }
     public String getUsername() { return username; }
-    public LocalDateTime getCreatedAt() { return createdAt; } 
-    public BigDecimal getTotalPrice() { return totalPrice; } 
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public BigDecimal getTotalPrice() { return totalPrice; }
 }

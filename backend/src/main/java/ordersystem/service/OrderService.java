@@ -5,13 +5,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import ordersystem.repository.*;
-import ordersystem.util.PriceCalculator;
 import ordersystem.model.*;
 import ordersystem.dto.OrderResponseDTO;
 import ordersystem.dto.OrderRequestDTO;
@@ -43,45 +41,55 @@ public class OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         if (user.getRole() == Role.ADMIN) {
-            return orderRepository.findAllWithProducts(pageable)
+            return orderRepository.findAllWithItems(pageable)
                     .map(OrderMapper::toDTO);
         } else {
-            return orderRepository.findByUserUsernameWithProducts(currentUsername, pageable)
+            return orderRepository.findByUserUsernameWithItems(currentUsername, pageable)
                     .map(OrderMapper::toDTO);
         }
     }
 
     @Transactional
     public OrderResponseDTO create(OrderRequestDTO dto) {
-        String currentUsername = authService.getCurrentUsername();
-        User user = userRepository.findByUsername(currentUsername)
+
+        String username = authService.getCurrentUsername();
+
+        User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
-        List<Product> products = dto.getProductIds().stream()
-            .map(id -> productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + id)))
+        Order order = new Order();
+        order.setUser(user);
+
+        List<OrderItem> items = dto.getItems().stream()
+            .map(itemDTO -> {
+
+                Product product = productRepository.findById(itemDTO.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                        "Producto no encontrado: " + itemDTO.getProductId()));
+
+                return new OrderItem(
+                    order,
+                    product,
+                    itemDTO.getQuantity(),
+                    product.getPrice()
+                );
+            })
             .toList();
 
-        BigDecimal total = PriceCalculator.calculateTotal(products);
+        order.setItems(items);
 
-        Order order = new Order();
-        order.setProducts(products);
-        order.setUser(user);
-        order.setTotalPrice(total); 
+        Order saved = orderRepository.save(order);
 
-        return OrderMapper.toDTO(orderRepository.save(order));
+        return OrderMapper.toDTO(saved);
     }
 
     @Transactional
     public void delete(Long id) {
-        // 1. Buscar la orden
         String ownerUsername = orderRepository.findOwnerUsernameById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Orden no encontrada con id: " + id));
 
-        // 2. Obtener usuario actual
         String currentUsername = authService.getCurrentUsername();
 
-        // 3. Validación de permisos
         boolean isAdmin = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getAuthorities()

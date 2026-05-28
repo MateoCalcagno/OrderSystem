@@ -18,7 +18,8 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(nullable = false)
+    private Role role = Role.USER;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -32,7 +33,6 @@ public class User {
     @Column(nullable = false)
     private String lastName;
 
-    // Relación: Un usuario puede tener muchos pedidos
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Order> orders;
 
@@ -49,7 +49,6 @@ public class User {
         this.lastName = lastName;
     }
 
-    // Getters y Setters
     public Long getId() { return id; }
 
     public String getUsername() { return username; }

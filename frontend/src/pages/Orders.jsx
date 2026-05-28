@@ -5,20 +5,13 @@ import { FaTrash } from "react-icons/fa";
 
 function Orders() {
   const { orders, deleteOrder, currentPage, totalPages, loadOrders } = useOrders();
-
   const [search, setSearch] = useState("");
   const { user } = useAuth();
 
-  const formatProducts = (productsArray) => {
-    if (!Array.isArray(productsArray) || productsArray.length === 0) return "Sin productos";
-
-    const counts = productsArray.reduce((acc, name) => {
-      acc[name] = (acc[name] || 0) + 1;
-      return acc;
-    }, {});
-
-    return Object.entries(counts)
-      .map(([name, count]) => `${name} (${count})`)
+  const formatItems = (items) => {
+    if (!Array.isArray(items) || items.length === 0) return "Sin productos";
+    return items
+      .map(item => `${item.productName} (×${item.quantity})`)
       .join(", ");
   };
 
@@ -33,7 +26,6 @@ function Orders() {
         {user.role === "ADMIN" ? "📦 Gestión de Órdenes" : "🛍️ Mis Compras"}
       </h2>
 
-      {/* 🔍 BUSCADOR (solo admin) */}
       {user.role === "ADMIN" && (
         <input
           type="text"
@@ -44,9 +36,8 @@ function Orders() {
         />
       )}
 
-      {/* 📦 LISTA */}
       <div className="flex-1 overflow-y-auto space-y-4 pr-2 scrollbar-hide flex flex-col">
-        
+
         {filteredOrders.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-white/30 text-base italic tracking-wide">
@@ -59,7 +50,7 @@ function Orders() {
               key={o.id}
               className="bg-white/5 p-4 px-6 rounded-2xl border border-white/5 grid grid-cols-4 items-center gap-4 text-white hover:bg-white/10 transition-all group"
             >
-              
+
               {/* 🧾 INFO */}
               <div className="flex items-center gap-4 min-w-0">
                 <div className="w-11 h-11 flex-shrink-0 bg-purple-600/20 rounded-xl flex items-center justify-center font-bold text-xs text-purple-400 border border-purple-500/10 shadow-lg">
@@ -68,7 +59,7 @@ function Orders() {
 
                 <div className="truncate">
                   <p className="font-semibold text-base text-white/90 truncate">
-                    {formatProducts(o.products)}
+                    {formatItems(o.items)}
                   </p>
 
                   {user.role === "ADMIN" && (
@@ -118,6 +109,7 @@ function Orders() {
         )}
 
       </div>
+
       {totalPages > 1 && (
         <div className="flex justify-center items-center gap-3 mt-4 pt-4 border-t border-white/10">
           <button
