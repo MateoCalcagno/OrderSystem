@@ -123,7 +123,7 @@ const styles = {
 };
 
 export default function App() {
-  const [count, setCount] = useState(8);
+  const [count, setCount] = useState(15);
 
   useEffect(() => {
     const interval = setInterval(() => {
